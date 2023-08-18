@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: DialogDtoAddColumn_unreadMessages
+      author: pp
+      changes:
+        - addColumn:
+            tableName: DialogDto
+            columns:
+              - column:
+                  name: unreadCount
+                  type: int
+                  constraints:
+                    nullable: false
