@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/message_microservice_2.iml" filepath="$PROJECT_DIR$/message_microservice_2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/messages_microservice/Message_microservice.iml" filepath="$PROJECT_DIR$/messages_microservice/Message_microservice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/message_microservice.iml" filepath="$PROJECT_DIR$/message_microservice.iml" />
     </modules>
   </component>
 </project>
