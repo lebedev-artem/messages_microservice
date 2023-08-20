@@ -1,0 +1,25 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://5.63.154.191:5432/messages
+    username: selectel
+    password: selectel
+    driverClassName: org.postgresql.Driver
+    spring.jpa.database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+
+
+
+jpa:
+  spring.jpa.database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+
+liquibase:
+  enabled: true
+
+  change-log: classpath:liquibase/changelog.xml
+  default-schema: public
+
+
