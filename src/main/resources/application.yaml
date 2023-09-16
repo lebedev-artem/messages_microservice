@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: message-micro-service
+    name: MESSAGE-SERVICE
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   datasource:
