@@ -11,9 +11,6 @@ public class UnreadCountDto {
 
     // Количество непрочитанных сообщений в диалоге
 
-
     Integer count;
-
-
 
 }

@@ -1,12 +1,13 @@
 package ru.skillbox.socialnetwork.messages.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springdoc.core.converters.models.Sort;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 
-@Getter
-@Setter
-
+@Data
+@Schema
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PageMessageShortDto {
 
     Integer totalPages;

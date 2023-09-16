@@ -1,12 +1,15 @@
 package ru.skillbox.socialnetwork.messages.dto;
 
 
-import lombok.Getter;
-import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 import org.springframework.data.domain.Sort;
 
-@Getter
-@Setter
+@Data
+@Schema
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Pageable {
 
     Integer page;
