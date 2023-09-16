@@ -1,16 +1,16 @@
 package ru.skillbox.socialnetwork.messages.dto;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-
+@Data
+@Schema
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class MessageShortDto {
-
 
     @NonNull
     String id;
@@ -30,6 +30,4 @@ public class MessageShortDto {
 
     //Текст сообщения
     String messageText;
-
-
 }

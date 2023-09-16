@@ -1,17 +1,16 @@
 package ru.skillbox.socialnetwork.messages.dto;
 
-
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-
+@Data
+@Schema
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class MessageDto {
-
 
     @NonNull
     String id;
@@ -20,7 +19,6 @@ public class MessageDto {
 
     //Дата и время отправки
     LocalDateTime time;
-
 
     //UUID первого собеседника
     @NonNull
@@ -33,15 +31,9 @@ public class MessageDto {
     //Текст сообщения
     String messageText;
 
-
     //Статус прочтения: SENT, READ - отправлен, прочитан
     String readStatus;
 
     // UUID диалога
     String dialogId;
-
-
-
-
-
 }
