@@ -4,6 +4,7 @@ package ru.skillbox.socialnetwork.messages.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import ru.skillbox.socialnetwork.messages.dto.*;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -14,19 +15,26 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.socialnetwork.messages.services.DialogService;
+import ru.skillbox.socialnetwork.messages.services.MessageService;
 
 import javax.validation.Valid;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import static ru.skillbox.socialnetwork.messages.dto.EMessageStatus.READ;
+import static ru.skillbox.socialnetwork.messages.dto.EMessageStatus.SENT;
 
 
 @RestController
 @RequestMapping("/api/v1/dialogs")
 @SecurityRequirement(name = "JWT")
-@Tag(name = "Message service", description = "Сервис друзей")
+@RequiredArgsConstructor
+@Tag(name = "Message service", description = "Сервис сообщений")
 public class MessageControllers {
 
-    private DialogService dialogService;
+    private final DialogService dialogService;
+    private final MessageService messageService;
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
@@ -42,7 +50,7 @@ public class MessageControllers {
             @ApiResponse(responseCode = "400", description = "Bad request")})
     @Operation(summary = "Создание сообщения, для тестирования")
     @PostMapping(path = "/createMessage", produces = {"application/json"}, consumes = {"application/json"})
-    public MessageDto createMessage
+    public Object createMessage
             (@Valid
              @Parameter(
                      in = ParameterIn.DEFAULT,
@@ -50,17 +58,7 @@ public class MessageControllers {
                      required = true,
                      schema = @Schema())
              @RequestBody MessageDto messageDto) {
-//        dialogService
-        return MessageDto.builder()
-                .id("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                .isDeleted(true)
-                .time(LocalDateTime.now())
-                .conversationPartner1("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                .conversationPartner2("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                .messageText("string")
-                .readStatus("string")
-                .dialogId("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                .build();
+        return messageService.createMessage(messageDto);
     }
 
     @ApiResponses(value = {
@@ -68,7 +66,7 @@ public class MessageControllers {
             @ApiResponse(responseCode = "400", description = "Bad request")})
     @Operation(summary = "Создание диалога, для тестирования")
     @PostMapping(path = "/createDialog", produces = {"application/json"}, consumes = {"application/json"})
-    public DialogDto createDialog
+    public Object createDialog
             (@Valid
              @Parameter(
                      in = ParameterIn.DEFAULT,
@@ -77,23 +75,7 @@ public class MessageControllers {
                      schema = @Schema())
              @RequestBody DialogDto dialogDto) {
 
-        return DialogDto.builder()
-                .id("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                .isDeleted(true)
-                .unreadCount(0)
-                .conversationPartner1("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                .conversationPartner2("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                .lastMessage(MessageDto.builder()
-                        .id("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                        .isDeleted(true)
-                        .time(LocalDateTime.now())
-                        .conversationPartner1("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                        .conversationPartner2("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                        .messageText("string")
-                        .readStatus("string")
-                        .dialogId("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                        .build())
-                .build();
+        return dialogService.createDialog(dialogDto);
     }
 
     @ApiResponses(value = {
@@ -130,16 +112,16 @@ public class MessageControllers {
                         .id("3fa85f64-5717-4562-b3fc-2c963f66afa6")
                         .isDeleted(true)
                         .unreadCount(0)
-                        .conversationPartner1("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                        .conversationPartner2("3fa85f64-5717-4562-b3fc-2c963f66afa6")
+                        .conversationPartner1(105L)
+                        .conversationPartner2(85L)
                         .lastMessage(MessageDto.builder()
                                 .id("3fa85f64-5717-4562-b3fc-2c963f66afa6")
                                 .isDeleted(true)
-                                .conversationPartner1("3fa85f64-5717-4562-b3fc-2c963f66afa")
-                                .conversationPartner2("3fa85f64-5717-4562-b3fc-2c963f66afa")
+                                .conversationPartner1(105L)
+                                .conversationPartner2(85L)
                                 .messageText("string")
-                                .readStatus("string")
-                                .dialogId("3fa85f64-5717-4562-b3fc-2c963f66afa")
+                                .status(SENT)
+                                .dialogId(UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa"))
                                 .build())
                         .build())
                 .number(0)
@@ -169,17 +151,17 @@ public class MessageControllers {
                 .id("3fa85f64-5717-4562-b3fc-2c963f66afa6")
                 .isDeleted(true)
                 .unreadCount(0)
-                .conversationPartner1("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                .conversationPartner2("3fa85f64-5717-4562-b3fc-2c963f66afa6")
+                .conversationPartner1(105L)
+                .conversationPartner2(85L)
                 .lastMessage(MessageDto.builder()
                         .id("3fa85f64-5717-4562-b3fc-2c963f66afa6")
                         .isDeleted(true)
-                        .time(LocalDateTime.now())
-                        .conversationPartner1("3fa85f64-5717-4562-b3fc-2c963f66afa6")
-                        .conversationPartner2("3fa85f64-5717-4562-b3fc-2c963f66afa6")
+                        .time(new Timestamp(System.currentTimeMillis()))
+                        .conversationPartner1(105L)
+                        .conversationPartner2(85L)
                         .messageText("string")
-                        .readStatus("string")
-                        .dialogId("3fa85f64-5717-4562-b3fc-2c963f66afa6")
+                        .status(READ)
+                        .dialogId(UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa6"))
                         .build())
                 .build();
     }

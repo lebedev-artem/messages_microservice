@@ -13,14 +13,14 @@
         <sql>
             SET timezone = 'Europe/Moscow';
         </sql>
-        <createTable  tableName="messages">
+        <createTable  tableName="dialogs">
             <column name="id" type="UUID">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_message"/>
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_dialogs"/>
             </column>
             <column name="is_deleted" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column name="time" type="TIMESTAMP">
+            <column name="unread_count" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="conversation_partner_1" type="BIGINT">
@@ -29,13 +29,7 @@
             <column name="conversation_partner_2" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="message_text" type="VARCHAR(768)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="status" type="VARCHAR(32)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="dialog_id" type="UUID">
+            <column name="last_message" type="UUID">
                 <constraints nullable="false"/>
             </column>
         </createTable>

@@ -12,6 +12,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="Message_microservice" target="11" />
+      <module name="messages" target="11" />
       <module name="messages_microservice" target="11" />
     </bytecodeTargetLevel>
   </component>

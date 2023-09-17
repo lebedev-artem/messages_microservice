@@ -3,7 +3,9 @@ package ru.skillbox.socialnetwork.messages.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Schema
@@ -12,28 +14,28 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class MessageDto {
 
-    @NonNull
-    String id;
-
-    boolean isDeleted;
-
+    private String id;
+    private Boolean isDeleted;
     //Дата и время отправки
-    LocalDateTime time;
-
-    //UUID первого собеседника
-    @NonNull
-    String conversationPartner1;
-
-    //UUID второго собеседника
-    @NonNull
-    String conversationPartner2;
-
+    private Timestamp time;
+    //id первого собеседника
+    private Long conversationPartner1;
+    //id второго собеседника
+    private Long conversationPartner2;
     //Текст сообщения
-    String messageText;
-
+    private String messageText;
     //Статус прочтения: SENT, READ - отправлен, прочитан
-    String readStatus;
-
+    private EMessageStatus status;
     // UUID диалога
-    String dialogId;
+    private UUID dialogId;
+
+    public MessageDto(Long conversationPartner1, Long conversationPartner2, String messageText, EMessageStatus status, UUID dialogId) {
+        this.isDeleted = false;
+        this.time = new Timestamp(System.currentTimeMillis());
+        this.conversationPartner1 = conversationPartner1;
+        this.conversationPartner2 = conversationPartner2;
+        this.messageText = messageText;
+        this.status = status;
+        this.dialogId = dialogId;
+    }
 }

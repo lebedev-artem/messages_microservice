@@ -7,6 +7,6 @@ import java.util.UUID;
 
 public interface DialogService {
 
-    ResponseEntity<DialogDto> gedDialogByID (UUID id);
+    Object createDialog(DialogDto dialogDto);
 
 }
