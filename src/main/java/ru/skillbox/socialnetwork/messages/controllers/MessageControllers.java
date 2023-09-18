@@ -45,8 +45,9 @@ public class MessageControllers {
 			@ApiResponse(responseCode = "400", description = "Bad request")})
 	@Operation(summary = "Обновление статуса сообщений")
 	@PutMapping(path = "/{dialogId}")
-	public void dialogID(@PathVariable(value = "dialogId") UUID dialogId) {
-//        dialogService.gedDialogByID(dialogId);
+	public Object changeMessageStatus(@PathVariable(value = "dialogId") UUID dialogId) {
+
+		return messageService.changeMessageStatus(dialogId);
 	}
 
 	@ApiResponses(value = {

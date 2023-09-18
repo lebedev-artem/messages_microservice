@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.skillbox.socialnetwork.messages.dto.EMessageStatus;
 import ru.skillbox.socialnetwork.messages.dto.MessageDto;
 import ru.skillbox.socialnetwork.messages.exception.ErrorResponse;
 import ru.skillbox.socialnetwork.messages.exception.exceptions.DialogNotFoundException;
@@ -15,7 +16,9 @@ import ru.skillbox.socialnetwork.messages.repository.MessageRepository;
 import ru.skillbox.socialnetwork.messages.services.MessageService;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @author Artem Lebedev | 18/09/2023 - 00:14
@@ -47,5 +50,22 @@ public class MessageServiceImpl implements MessageService {
 		messageRepository.save(mm);
 
 		return new ResponseEntity<>(modelMapper.map(mm, MessageDto.class), HttpStatus.OK);
+	}
+
+	@Override
+	@Transactional
+	public Object changeMessageStatus(UUID dialogId) {
+		Optional<List<MessageModel>> mmList =
+				Optional.ofNullable(messageRepository
+						.findByDialogId(dialogId)
+						.orElseThrow(() -> new DialogNotFoundException("Dialog with id " + dialogId + " not found")));
+		if (mmList.isPresent()){
+			for (MessageModel m : mmList.get()) {
+				m.setStatus(EMessageStatus.READ);
+			}
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+
+		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 	}
 }
