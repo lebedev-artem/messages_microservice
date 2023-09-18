@@ -1,7 +1,11 @@
 package ru.skillbox.socialnetwork.messages.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+
+import java.util.UUID;
 
 @Data
 @Schema
@@ -10,7 +14,7 @@ import lombok.*;
 @NoArgsConstructor
 public class DialogDto {
 
-    String id;
+    private UUID id;
     private Boolean isDeleted;
     //Количество непрочитанных сообщений диалога
     private Integer unreadCount;

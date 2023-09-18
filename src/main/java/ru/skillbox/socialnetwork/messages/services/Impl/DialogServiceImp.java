@@ -1,6 +1,7 @@
 package ru.skillbox.socialnetwork.messages.services.Impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ import javax.transaction.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DialogServiceImp implements DialogService {
@@ -33,11 +34,12 @@ public class DialogServiceImp implements DialogService {
     @Transactional
     public Object createDialog(@NotNull DialogDto dialogDto) {
 
-
+        log.info("asd");
 //        TODO
 //        Надо подумать как десериализовывтаь UUID
+
         Optional<MessageModel> lastMessage = Optional.ofNullable(messageRepository
-                .findByDialogId(UUID.fromString(dialogDto.getId()))
+                .findByDialogId(UUID.fromString(dialogDto.getId().toString()))
                 .orElseThrow(() -> new DialogNotFoundException("Dialog with id " + dialogDto.getId() + " not found")));
 
         MessageDto lastMessageDto = modelMapper.map(lastMessage, MessageDto.class);
