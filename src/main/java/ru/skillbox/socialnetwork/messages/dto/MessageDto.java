@@ -15,9 +15,9 @@ import java.util.UUID;
 public class MessageDto {
 
     private String id;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
     //Дата и время отправки
-    private Timestamp time;
+    private Timestamp time = new Timestamp(System.currentTimeMillis());
     //id первого собеседника
     private Long conversationPartner1;
     //id второго собеседника
@@ -25,7 +25,7 @@ public class MessageDto {
     //Текст сообщения
     private String messageText;
     //Статус прочтения: SENT, READ - отправлен, прочитан
-    private EMessageStatus status;
+    private EMessageStatus status = EMessageStatus.SENT;
     // UUID диалога
     private UUID dialogId;
 

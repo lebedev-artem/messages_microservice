@@ -1,6 +1,8 @@
 package ru.skillbox.socialnetwork.messages.models;
 
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -8,9 +10,9 @@ import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(name="dialogs")
+@NoArgsConstructor
 public class DialogModel {
 
     @Id
@@ -33,6 +35,5 @@ public class DialogModel {
     @OneToOne(fetch = FetchType.EAGER, optional = false, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
     @JoinColumn(name = "last_message")
     private MessageModel lastMessage;
-
 
 }
