@@ -25,9 +25,9 @@ public class MessageModel {
 	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
 	private UUID id;
 	@Column(name = "is_deleted")
-	private Boolean isDeleted;
+	private Boolean isDeleted = false;
 	@Column(name = "time")
-	private Timestamp time;
+	private Timestamp time = new Timestamp(System.currentTimeMillis());
 	@Column(name = "conversation_partner_1")
 	private Long conversationPartner1;
 	@Column(name = "conversation_partner_2")

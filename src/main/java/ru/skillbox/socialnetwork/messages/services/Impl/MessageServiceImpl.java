@@ -7,11 +7,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.skillbox.socialnetwork.messages.dto.MessageDto;
 import ru.skillbox.socialnetwork.messages.exception.ErrorResponse;
+import ru.skillbox.socialnetwork.messages.exception.exceptions.DialogNotFoundException;
+import ru.skillbox.socialnetwork.messages.models.DialogModel;
 import ru.skillbox.socialnetwork.messages.models.MessageModel;
+import ru.skillbox.socialnetwork.messages.repository.DialogRepository;
 import ru.skillbox.socialnetwork.messages.repository.MessageRepository;
 import ru.skillbox.socialnetwork.messages.services.MessageService;
 
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 /**
  * @author Artem Lebedev | 18/09/2023 - 00:14
@@ -21,18 +25,27 @@ import javax.transaction.Transactional;
 public class MessageServiceImpl implements MessageService {
 	private final ModelMapper modelMapper;
 	private final MessageRepository messageRepository;
+	private final DialogRepository dialogRepository;
 
+	/**
+	 * Потом создаем сообщения к конкретному диалогу.
+	 * Инкрементим unreadCount
+	 */
 	@Override
 	public Object createMessage(MessageDto messageDto) {
 
 		MessageModel mm = modelMapper.map(messageDto, MessageModel.class);
-		try {
-			messageRepository.save(mm);
+		Optional<DialogModel> dm = Optional.ofNullable(
+				dialogRepository
+						.findById(mm.getDialogId())
+						.orElseThrow(() -> new DialogNotFoundException("Dialog with id " + mm.getDialogId() + " not found")));
+		if (dm.isPresent()) {
+			dm.get().setLastMessage(mm);
+			dm.get().setUnreadCount(dm.get().getUnreadCount() + 1);
 		}
-		catch (RuntimeException e) {
-			new ResponseEntity<>(
-					new ErrorResponse("Error while creating or saving message", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
-		}
+
+		messageRepository.save(mm);
+
 		return new ResponseEntity<>(modelMapper.map(mm, MessageDto.class), HttpStatus.OK);
 	}
 }

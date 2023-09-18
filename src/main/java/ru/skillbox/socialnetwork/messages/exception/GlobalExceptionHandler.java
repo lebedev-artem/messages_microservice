@@ -87,7 +87,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	@ExceptionHandler({DialogNotFoundException.class})
-	public ResponseEntity<ErrorResponse> handleDialogNotFoundException(@NotNull CallNotPermittedException e, WebRequest request) {
+	public ResponseEntity<ErrorResponse> handleDialogNotFoundException(@NotNull DialogNotFoundException e, WebRequest request) {
 		log.error(" ! GlobalExceptionHandler trap DialogNotFoundException");
 		return new ResponseEntity<>(new ErrorResponse(
 				e.getMessage(), HttpStatus.valueOf(404)),

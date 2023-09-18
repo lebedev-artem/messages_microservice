@@ -16,12 +16,12 @@ import java.util.UUID;
 public class DialogModel {
 
     @Id
-    @GeneratedValue(generator = "uuid-hibernate-generator")
-    @GenericGenerator(name = "uuid-hibernate-generator", strategy = "org.hibernate.id.UUIDGenerator")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
     private UUID id;
 
     @Column(name = "`is_deleted`", nullable = false)
-    private boolean isDeleted;
+    private boolean isDeleted = false;
 
     @Column(name = "`unread_count`", nullable = false)
     private int unreadCount;
@@ -32,7 +32,7 @@ public class DialogModel {
     @Column(name = "`conversation_partner_2`", nullable = false)
     private Long conversationPartner2;
 
-    @OneToOne(fetch = FetchType.EAGER, optional = false, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
+    @OneToOne(fetch = FetchType.EAGER, optional = true, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
     @JoinColumn(name = "last_message")
     private MessageModel lastMessage;
 
