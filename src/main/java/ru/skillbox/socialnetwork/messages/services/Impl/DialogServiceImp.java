@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.skillbox.socialnetwork.messages.dto.DialogDto;
 import ru.skillbox.socialnetwork.messages.dto.MessageDto;
+import ru.skillbox.socialnetwork.messages.dto.UnreadCountDto;
 import ru.skillbox.socialnetwork.messages.exception.ErrorResponse;
 import ru.skillbox.socialnetwork.messages.exception.exceptions.DialogNotFoundException;
 import ru.skillbox.socialnetwork.messages.models.DialogModel;
@@ -73,6 +74,17 @@ public class DialogServiceImp implements DialogService {
 		Page<DialogModel> dialogDtoPage = dialogRepository.findAllByConversationPartner1(conversationPartner1, pageable);
 
 		return new ResponseEntity<>(dialogDtoPage, HttpStatus.OK);
+	}
+
+	@Override
+	public Object getUnreadCount(UUID dialogId) {
+		Optional<Integer> unreadCount = Optional.ofNullable(dialogRepository.findById(dialogId).get().getUnreadCount());
+		if (unreadCount.isPresent()) {
+			UnreadCountDto unreadCountDto = new UnreadCountDto(unreadCount.get());
+			return new ResponseEntity<>(unreadCountDto, HttpStatus.OK);
+		}
+
+		return new ResponseEntity<>("Dialog with id " + dialogId + " not found", HttpStatus.BAD_REQUEST);
 	}
 
 }

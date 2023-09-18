@@ -1,16 +1,15 @@
 package ru.skillbox.socialnetwork.messages.dto;
 
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
-@Getter
-@Setter
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UnreadCountDto {
 
     // Количество непрочитанных сообщений в диалоге
-
-    Integer count;
+    private Integer count;
 
 }
