@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class MessageDto {
 
-    private String id;
+    private UUID id;
     private Boolean isDeleted = false;
     //Дата и время отправки
     private Timestamp time = new Timestamp(System.currentTimeMillis());

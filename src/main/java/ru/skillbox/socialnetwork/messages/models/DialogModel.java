@@ -27,10 +27,10 @@ public class DialogModel {
     private int unreadCount;
 
     @Column(name = "`conversation_partner_1`", nullable = false)
-    private UUID conversationPartner1;
+    private Long conversationPartner1;
 
     @Column(name = "`conversation_partner_2`", nullable = false)
-    private UUID conversationPartner2;
+    private Long conversationPartner2;
 
     @OneToOne(fetch = FetchType.EAGER, optional = false, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
     @JoinColumn(name = "last_message")
