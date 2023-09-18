@@ -3,6 +3,7 @@ package ru.skillbox.socialnetwork.messages.repository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import ru.skillbox.socialnetwork.messages.dto.UnreadCountDto;
 import ru.skillbox.socialnetwork.messages.models.DialogModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
