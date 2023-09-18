@@ -85,7 +85,7 @@ public class MessageControllers {
 			@ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Bad request")})
 	@Operation(summary = "Получение списка диалогов")
-	@GetMapping(path = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	public Object getDialogs
 			(@RequestParam(required = false, defaultValue = "0") Integer page,
 			 @RequestParam(required = false, defaultValue = "1") Integer size,
