@@ -9,4 +9,6 @@
         <runningAs username="selectel"/>
     </preConditions>
     <include file="create-changeset-messages.xml" relativeToChangelogFile="true"/>
+    <include file="create-changeset-dialogs.xml" relativeToChangelogFile="true"/>
+    <include file="create-changeset-messages-dialogs-constraint.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

@@ -10,21 +10,14 @@ import lombok.*;
 @NoArgsConstructor
 public class DialogDto {
 
-    @NonNull
     String id;
-
-    boolean isDeleted;
-
+    private Boolean isDeleted;
     //Количество непрочитанных сообщений диалога
-    Integer unreadCount;
-
-    //UUID первого собеседника
-    @NonNull
-    String conversationPartner1;
-
-    //UUID второго собеседника
-    @NonNull
-    String conversationPartner2;
-
-    MessageDto lastMessage;
+    private Integer unreadCount;
+    //id первого собеседника
+    private Long conversationPartner1;
+    //id второго собеседника
+    private Long conversationPartner2;
+    //Последнее сообщение
+    private MessageDto lastMessage;
 }
