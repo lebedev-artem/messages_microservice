@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.stylesheets.LinkStyle;
 import ru.skillbox.socialnetwork.messages.dto.DialogDto;
 import ru.skillbox.socialnetwork.messages.dto.MessageDto;
 import ru.skillbox.socialnetwork.messages.dto.UnreadCountDto;
@@ -22,6 +23,7 @@ import ru.skillbox.socialnetwork.messages.security.service.UserDetailsServiceImp
 import ru.skillbox.socialnetwork.messages.services.DialogService;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -77,14 +79,15 @@ public class DialogServiceImp implements DialogService {
 	}
 
 	@Override
-	public Object getUnreadCount(UUID dialogId) {
-		Optional<Integer> unreadCount = Optional.ofNullable(dialogRepository.findById(dialogId).get().getUnreadCount());
-		if (unreadCount.isPresent()) {
-			UnreadCountDto unreadCountDto = new UnreadCountDto(unreadCount.get());
+	public Object getUnreadCount() {
+		Optional<Object> list = Optional.ofNullable(dialogRepository.findAllByConversationPartner1(getPrincipalId()));
+		if (list.isPresent()) {
+			List<DialogModel> dialogModelList = (List<DialogModel>) list.get();
+			int unreadCount = dialogModelList.stream().mapToInt(DialogModel::getUnreadCount).sum();
+			UnreadCountDto unreadCountDto = new UnreadCountDto(unreadCount);
 			return new ResponseEntity<>(unreadCountDto, HttpStatus.OK);
 		}
-
-		return new ResponseEntity<>("Dialog with id " + dialogId + " not found", HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>("Dialogs for user " + getPrincipalId() + " not found", HttpStatus.BAD_REQUEST);
 	}
 
 }
