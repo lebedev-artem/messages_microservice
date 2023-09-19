@@ -102,8 +102,8 @@ public class MessageControllers {
 			@ApiResponse(responseCode = "400", description = "Bad request")})
 	@Operation(summary = "Получение количества непрочитанных сообщений")
 	@GetMapping(value = "/unread", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Object unread(@RequestParam UUID dialogId) {
-		return dialogService.getUnreadCount(dialogId);
+	public Object unread() {
+		return dialogService.getUnreadCount();
 	}
 
 	@ApiResponses(value = {

@@ -10,6 +10,6 @@ public interface DialogService {
 
     Object createDialog(DialogDto dialogDto);
     Object getDialogs(Pageable pageable);
-    Object getUnreadCount(UUID dialogId);
+    Object getUnreadCount();
 
 }

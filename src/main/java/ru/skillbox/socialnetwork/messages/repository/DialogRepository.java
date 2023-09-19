@@ -7,11 +7,13 @@ import ru.skillbox.socialnetwork.messages.dto.UnreadCountDto;
 import ru.skillbox.socialnetwork.messages.models.DialogModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface DialogRepository extends JpaRepository<DialogModel, UUID> {
 	@NotNull
 	Page<DialogModel> findAllByConversationPartner1(Long conversationPartner1, @NotNull Pageable pageable);
+	List<DialogModel> findAllByConversationPartner1(Long conversationPartner1);
 	Boolean existsByConversationPartner1AndConversationPartner2(Long conversationPartner1, Long conversationPartner2);
 
 }
