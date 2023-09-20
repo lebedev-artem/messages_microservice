@@ -1,41 +1,48 @@
 package ru.skillbox.socialnetwork.messages.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.bouncycastle.util.Times;
+import org.jetbrains.annotations.Nullable;
 
+import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.UUID;
+
 
 @Data
 @Schema
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 public class MessageDto {
+	@Nullable
+	private Timestamp time;
+	private Long authorId;
+	private String messageText;
 
-    private UUID id;
-    private Boolean isDeleted = false;
-    //Дата и время отправки
-    private Timestamp time = new Timestamp(System.currentTimeMillis());
-    //id первого собеседника
-    private Long conversationPartner1;
-    //id второго собеседника
-    private Long conversationPartner2;
-    //Текст сообщения
-    private String messageText;
-    //Статус прочтения: SENT, READ - отправлен, прочитан
-    private EMessageStatus status = EMessageStatus.SENT;
-    // UUID диалога
-    private UUID dialogId;
 
-    public MessageDto(Long conversationPartner1, Long conversationPartner2, String messageText, EMessageStatus status, UUID dialogId) {
-        this.isDeleted = false;
-        this.time = new Timestamp(System.currentTimeMillis());
-        this.conversationPartner1 = conversationPartner1;
-        this.conversationPartner2 = conversationPartner2;
-        this.messageText = messageText;
-        this.status = status;
-        this.dialogId = dialogId;
-    }
+	/**
+	 *     "Последнее сообщение". Или просто сообщение
+	 *     Было:
+	 *     private UUID id;
+	 *     private Boolean isDeleted = false;
+	 *     private Timestamp time;
+	 *     private Long conversationPartner1;
+	 *     private Long conversationPartner2;
+	 *     private String messageText;
+	 *     private EMessageStatus status;
+	 *     private UUID dialogId; (это поле возможно надо будет удалить, добавил чтоб делать выборку непрочитанных по айди диалога, но это кажется не нужно)
+	 *     --------------------cut---------------------
+	 *     Должно стать:
+	 *      private UUID id;
+	 *      private Boolean isDeleted;
+	 *      private Timestamp time;
+	 *      private Long Author author;
+	 *      private String messageText;
+	 *      private EMessageStatus status;
+	 *      private UUID dialogId; (это поле возможно надо будет удалить, добавил чтоб делать выборку непрочитанных по айди диалога, но это кажется не нужно)
+	 */
+
 }

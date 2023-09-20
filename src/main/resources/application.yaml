@@ -24,6 +24,10 @@ users-service:
   url: http://${server.remote.address}:8085/api/v1
   host: 5.63.154.191
   port: 8085
+friends-service:
+  url: http://${server.remote.address}:8083/api/v1
+  host: 5.63.154.191
+  port: 8083
 
 jwt:
   access-token-duration: 43_200_000

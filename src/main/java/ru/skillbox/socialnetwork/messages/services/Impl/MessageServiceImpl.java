@@ -53,10 +53,9 @@ public class MessageServiceImpl implements MessageService {
             dm.get().setUnreadCount(dm.get().getUnreadCount() + 1);
         }
 
-        messageRepository.save(mm);
-
-        return new ResponseEntity<>(modelMapper.map(mm, MessageDto.class), HttpStatus.OK);
-    }
+		messageRepository.save(mm);
+		return new ResponseEntity<>(modelMapper.map(mm, MessageDto.class), HttpStatus.OK);
+	}
 
     @Override
     @Transactional
