@@ -17,7 +17,7 @@
         <addForeignKeyConstraint constraintName="fk_m_a"
                                  baseTableName="messages"
                                  baseColumnNames="author_id"
-                                 referencedTableName="author_of_message"
+                                 referencedTableName="author"
                                  referencedColumnNames="id"/>
     </changeSet>
 </databaseChangeLog>
