@@ -1,5 +1,7 @@
 package ru.skillbox.socialnetwork.messages.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.skillbox.socialnetwork.messages.models.MessageModel;
 
@@ -13,6 +15,8 @@ import java.util.UUID;
 public interface MessageRepository extends JpaRepository<MessageModel, UUID> {
 
 	Optional<List<MessageModel>> findByDialogId(UUID dialogId);
+
+	Page<MessageModel> findByDialogId(UUID uuid, Pageable pageable);
 
 
 

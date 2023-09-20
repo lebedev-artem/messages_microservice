@@ -1,5 +1,6 @@
 package ru.skillbox.socialnetwork.messages.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageShortDto {
 
     @NonNull
@@ -22,11 +24,11 @@ public class MessageShortDto {
 
     //UUID первого собеседника
     @NonNull
-    String conversationPartner1;
+    Long conversationPartner1;
 
     //UUID второго собеседника
     @NonNull
-    String conversationPartner2;
+    Long conversationPartner2;
 
     //Текст сообщения
     String messageText;

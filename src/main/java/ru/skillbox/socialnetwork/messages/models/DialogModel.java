@@ -1,9 +1,7 @@
 package ru.skillbox.socialnetwork.messages.models;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -11,8 +9,11 @@ import java.util.UUID;
 
 @Entity
 @Data
+@Builder
 @Table(name="dialogs")
+@AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DialogModel {
 
     @Id

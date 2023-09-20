@@ -1,9 +1,11 @@
 package ru.skillbox.socialnetwork.messages.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.UuidGenerator;
 import ru.skillbox.socialnetwork.messages.dto.EMessageStatus;
 
 import javax.persistence.*;
@@ -18,6 +20,9 @@ import java.util.UUID;
 @Data
 @Table(name="messages")
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageModel {
 
 	@Id
