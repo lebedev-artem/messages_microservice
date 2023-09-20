@@ -2,7 +2,10 @@ package ru.skillbox.socialnetwork.messages.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+
+import java.util.List;
 
 @Data
 @Schema
@@ -15,7 +18,7 @@ public class PageMessageShortDto {
 
     Integer totalElements;
 
-   Sort sort;
+    Sort sort;
 
     Integer numberOfElements;
 
@@ -27,7 +30,7 @@ public class PageMessageShortDto {
 
     Integer size;
 
-    MessageShortDto content;
+    List<MessageShortDto> content;
 
     Integer number;
 
