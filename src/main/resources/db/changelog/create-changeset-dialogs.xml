@@ -23,10 +23,10 @@
             <column name="unread_count" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="conversation_partner_1" type="BIGINT">
+            <column name="conversation_author" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="conversation_partner_2" type="BIGINT">
+            <column name="conversation_partner" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="last_message" type="UUID">
