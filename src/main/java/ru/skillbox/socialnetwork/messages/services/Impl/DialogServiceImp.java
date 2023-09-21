@@ -4,18 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.stylesheets.LinkStyle;
 import ru.skillbox.socialnetwork.messages.client.UsersClient;
 import ru.skillbox.socialnetwork.messages.client.dto.AccountDto;
 import ru.skillbox.socialnetwork.messages.dto.*;
 import ru.skillbox.socialnetwork.messages.exception.ErrorResponse;
-import ru.skillbox.socialnetwork.messages.exception.exceptions.DialogNotFoundException;
 import ru.skillbox.socialnetwork.messages.exception.exceptions.UserPrincipalsNotFound;
 import ru.skillbox.socialnetwork.messages.models.AuthorModel;
 import ru.skillbox.socialnetwork.messages.models.DialogModel;
@@ -23,14 +23,11 @@ import ru.skillbox.socialnetwork.messages.models.MessageModel;
 import ru.skillbox.socialnetwork.messages.repository.AuthorRepository;
 import ru.skillbox.socialnetwork.messages.repository.DialogRepository;
 import ru.skillbox.socialnetwork.messages.repository.MessageRepository;
-import ru.skillbox.socialnetwork.messages.security.service.UserDetailsServiceImpl;
 import ru.skillbox.socialnetwork.messages.services.DialogService;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static ru.skillbox.socialnetwork.messages.security.service.UserDetailsServiceImpl.getPrincipalId;
 
@@ -57,7 +54,6 @@ public class DialogServiceImp implements DialogService {
 				(getPrincipalId(), dialogDto.getConversationPartner().getId())) {
 			return new ResponseEntity<>(new ErrorResponse("Dialog already exists", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
 		} else if (dialogDto.getConversationPartner().getId() != null) {
-
 			try {
 				partnerPrincipal = usersClient.getUserDetailsById(dialogDto.getConversationPartner().getId());
 			} catch (RuntimeException e) {
@@ -72,14 +68,14 @@ public class DialogServiceImp implements DialogService {
 			if (amO.isPresent()) {
 				am = amO.get();
 			}
-		    mm = MessageModel.builder()
-				    .isDeleted(false)
-				    .time(new Timestamp(System.currentTimeMillis()))
-				    .author(am)
-				    .messageText("")
-				    .status(EMessageStatus.SENT)
-				    .dialogId(null) // for test
-				    .build();
+			mm = MessageModel.builder()
+					.isDeleted(false)
+					.time(new Timestamp(System.currentTimeMillis()))
+					.author(am)
+					.messageText("")
+					.status(EMessageStatus.SENT)
+					.dialogId(null) // for test
+					.build();
 			dm = DialogModel.builder()
 					.isDeleted(false)
 					.unreadCount(0)
@@ -100,17 +96,43 @@ public class DialogServiceImp implements DialogService {
 		return new ResponseEntity<>(dd, HttpStatus.OK);
 	}
 
+	@Nullable
+	private AuthorDto getAuthorFromId(Long id) {
+		Optional<AuthorModel> amO =
+				Optional.ofNullable(
+						authorRepository.findById(id).orElseThrow(
+								() -> new UserPrincipalsNotFound("User with id " + id + " does not exist")));
+		AuthorModel am;
+		if (amO.isEmpty()) {
+			log.error(" * User with id " + id + " does not exist");
+			throw new UserPrincipalsNotFound("User with id " + id + " does not exist");
+		}
+		am = amO.get();
+		return modelMapper.map(am, AuthorDto.class);
+	}
+
+
 	@Override
 	public Object getDialogs(Pageable pageable) {
 		Long conversationAuthor = getPrincipalId();
-		Page<DialogModel> dialogDtoPage = dialogRepository.findAllByConversationAuthor(conversationAuthor, pageable);
+		Set<DialogModel> dmSet = dialogRepository.findByConversationAuthor(conversationAuthor);
+		List<DialogDto> ddSet = new ArrayList<>();
+		for (DialogModel dm : dmSet){
+			Optional<MessageModel> mm = messageRepository.findById(dm.getLastMessage().getId());
+			DialogDto dd = DialogDto.builder()
+					.unreadCount(dm.getUnreadCount())
+					.conversationPartner(getAuthorFromId(dm.getConversationPartner()))
+					.lastMessage(new MessageDto(mm.get().getTime(), mm.get().getAuthor().getId(), mm.get().getMessageText())).build();
+			ddSet.add(dd);
+		}
+		Page<DialogDto> p = new PageImpl<>(ddSet, pageable, ddSet.size());
 
-		return new ResponseEntity<>(dialogDtoPage, HttpStatus.OK);
+		return new ResponseEntity<>(p, HttpStatus.OK);
 	}
 
 	@Override
 	public Object getUnreadCount() {
-		Optional<Object> list = Optional.ofNullable(dialogRepository.findAllByConversationAuthor(getPrincipalId()));
+		Optional<Object> list = Optional.ofNullable(dialogRepository.findByConversationAuthor(getPrincipalId()));
 		if (list.isPresent()) {
 			List<DialogModel> dialogModelList = (List<DialogModel>) list.get();
 			int unreadCount = dialogModelList.stream().mapToInt(DialogModel::getUnreadCount).sum();
