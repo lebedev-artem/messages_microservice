@@ -18,13 +18,13 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_author"/>
             </column>
             <column name="first_name" type="VARCHAR(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
             <column name="last_name" type="VARCHAR(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
             <column name="photo" type="VARCHAR">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
         </createTable>
     </changeSet>

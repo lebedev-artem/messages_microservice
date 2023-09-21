@@ -55,7 +55,6 @@ public class UserDetailsServiceImpl implements UserService {
 
 	public static Long getPrincipalId() {
 		Person person = (Person) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		Long id = ((Person) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
 		return person.getId();
 	}
 }
