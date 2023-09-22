@@ -7,7 +7,6 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.jetbrains.annotations.Contract;
 
 import javax.persistence.*;
 import java.util.UUID;

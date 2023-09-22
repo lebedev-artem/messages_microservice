@@ -1,6 +1,5 @@
 package ru.skillbox.socialnetwork.messages.services;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.skillbox.socialnetwork.messages.dto.MessageDto;
 import ru.skillbox.socialnetwork.messages.dto.MessageShortDto;

@@ -3,10 +3,6 @@ package ru.skillbox.socialnetwork.messages.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import org.bouncycastle.util.Times;
-import org.jetbrains.annotations.Nullable;
-
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.UUID;
 
