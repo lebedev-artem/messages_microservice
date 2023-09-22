@@ -7,10 +7,10 @@ import ru.skillbox.socialnetwork.messages.dto.DialogDto;
 @Service
 public interface DialogService {
 
-    Object getDialogOrCreate(DialogDto dialogDto);
-    Object getDialogs(Pageable pageable);
+    Object createDialog(DialogDto dialogDto);
+    Object getDialogsList(Pageable pageable);
     Object getUnreadCount();
 
-    DialogDto getDialogOrCreate(String id, Long conversationPartner1, Long conversationPartner2);
+//    DialogDto getDialogOrCreate(String id, Long conversationPartner1, Long conversationPartner2);
 
 }

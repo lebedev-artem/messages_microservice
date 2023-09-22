@@ -3,6 +3,7 @@ package ru.skillbox.socialnetwork.messages.services.Impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,10 +12,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.skillbox.socialnetwork.messages.client.UsersClient;
+import ru.skillbox.socialnetwork.messages.client.dto.AccountDto;
 import ru.skillbox.socialnetwork.messages.dto.*;
 import ru.skillbox.socialnetwork.messages.exception.exceptions.DialogNotFoundException;
+import ru.skillbox.socialnetwork.messages.exception.exceptions.UserPrincipalsNotFoundException;
+import ru.skillbox.socialnetwork.messages.models.AuthorModel;
 import ru.skillbox.socialnetwork.messages.models.DialogModel;
 import ru.skillbox.socialnetwork.messages.models.MessageModel;
+import ru.skillbox.socialnetwork.messages.repository.AuthorRepository;
 import ru.skillbox.socialnetwork.messages.repository.DialogRepository;
 import ru.skillbox.socialnetwork.messages.repository.MessageRepository;
 import ru.skillbox.socialnetwork.messages.services.MessageService;
@@ -36,6 +42,9 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
     private final DialogRepository dialogRepository;
     private final ObjectMapper objectMapper;
+    private final AuthorRepository authorRepository;
+    private final UsersClient usersClient;
+    private final CustomMapper customMapper;
 
     private static Long userId;
 
@@ -44,21 +53,22 @@ public class MessageServiceImpl implements MessageService {
      * Инкрементим unreadCount
      */
     @Override
+    @Transactional
     public Object createMessage(MessageDto messageDto) {
 
         MessageModel mm = modelMapper.map(messageDto, MessageModel.class);
-        Optional<DialogModel> dm = Optional.ofNullable(
-                dialogRepository
-                        .findById(mm.getDialogId())
-                        .orElseThrow(() -> new DialogNotFoundException("Dialog with id " + mm.getDialogId() + " not found")));
+        Optional<AuthorModel> aum = Optional.of(authorRepository.findById(mm.getAuthor().getId()).orElse(customMapper.getAuthorModelFromId(mm.getAuthor().getId())));
+        mm.setAuthor(aum.get());
+        messageRepository.save(mm);
+        Optional<DialogModel> dm = dialogRepository.findById(mm.getDialogId());
         if (dm.isPresent()) {
             dm.get().setLastMessage(mm);
             dm.get().setUnreadCount(dm.get().getUnreadCount() + 1);
+            dialogRepository.save(dm.get());
         }
 
-        messageRepository.save(mm);
-        return new ResponseEntity<>(modelMapper.map(mm, MessageDto.class), HttpStatus.OK);
-    }
+		return new ResponseEntity<>(modelMapper.map(mm, MessageDto.class), HttpStatus.OK);
+	}
 
     @Override
     @Transactional
@@ -90,4 +100,5 @@ public class MessageServiceImpl implements MessageService {
     public void setUserId(Long userId) {
         MessageServiceImpl.userId = userId;
     }
+
 }

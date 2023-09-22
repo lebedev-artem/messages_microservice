@@ -1,10 +1,14 @@
 package ru.skillbox.socialnetwork.messages.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.bytebuddy.agent.builder.AgentBuilder;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * @author Artem Lebedev | 20/09/2023 - 11:42 <p><p>

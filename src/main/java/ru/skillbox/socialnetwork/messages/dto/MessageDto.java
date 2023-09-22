@@ -8,7 +8,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.UUID;
 
+/**
+ * 	Timestamp time;<p>
+ * 	Long authorId;<p>
+ * 	String messageText;<p>
+ */
 
 @Data
 @Schema
@@ -17,11 +23,13 @@ import java.sql.Timestamp;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 public class MessageDto {
-	@Nullable
-	private Timestamp time;
-	private Long authorId;
-	private String messageText;
 
+	private Boolean isDeleted;
+	private Timestamp time;
+	private AuthorDto author;
+	private String messageText;
+	private EMessageStatus status;
+	private UUID dialogId;
 
 	/**
 	 *     "Последнее сообщение". Или просто сообщение

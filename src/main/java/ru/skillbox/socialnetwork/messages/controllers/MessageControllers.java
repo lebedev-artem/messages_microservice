@@ -22,11 +22,8 @@ import ru.skillbox.socialnetwork.messages.services.DialogService;
 import ru.skillbox.socialnetwork.messages.services.MessageService;
 
 import javax.validation.Valid;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
-
-import static ru.skillbox.socialnetwork.messages.dto.EMessageStatus.READ;
 
 @Slf4j
 @RestController
@@ -45,7 +42,6 @@ public class MessageControllers {
     @Operation(summary = "Обновление статуса сообщений")
     @PutMapping(path = "/{dialogId}")
     public Object changeMessageStatus(@PathVariable(value = "dialogId") UUID dialogId) {
-
         return messageService.changeMessageStatus(dialogId);
     }
 
@@ -62,6 +58,8 @@ public class MessageControllers {
                      required = true,
                      schema = @Schema())
              @RequestBody MessageDto messageDto) {
+        log.info(" * GET \"/createMessage\"");
+        log.info(" * Payload: \n{}", messageDto);
         return messageService.createMessage(messageDto);
     }
 
@@ -77,8 +75,9 @@ public class MessageControllers {
                     required = true,
                     schema = @Schema())
              @RequestBody DialogDto dialogDto) {
-
-        return dialogService.getDialogOrCreate(dialogDto);
+        log.info(" * GET \"/createDialog\"");
+        log.info(" * Payload: \n{}", dialogDto);
+        return dialogService.createDialog(dialogDto);
     }
 
     @ApiResponses(value = {
@@ -93,7 +92,7 @@ public class MessageControllers {
         log.info(" * GET \"/\"");
         log.info(" * Payload: page?{}, size?{}, sort?{}", page, size, sort);
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort).descending());
-        return dialogService.getDialogs(pageable);
+        return dialogService.getDialogsList(pageable);
     }
 
     @ApiResponses(value = {
@@ -102,19 +101,21 @@ public class MessageControllers {
     @Operation(summary = "Получение количества непрочитанных сообщений")
     @GetMapping(value = "/unread", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object unread() {
+        log.info(" * GET \"/unread\"");
         return dialogService.getUnreadCount();
     }
+//
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Successful operation"),
+//            @ApiResponse(responseCode = "400", description = "Bad request")})
+//    @Operation(summary = "Получение(создание) диалога между пользователями")
+//    @GetMapping(value = "/recipientId", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public DialogDto recipientId(@RequestParam(required = false) String id,
+//                                 @RequestParam(name = "conversationPartner1", required = false) Long conversationPartner1,
+//                                 @RequestParam(name = "conversationPartner2", required = false) Long conversationPartner2) {
+//        return dialogService.getDialogOrCreate(id, conversationPartner1, conversationPartner2);
+//    }
 
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "400", description = "Bad request")})
-    @Operation(summary = "Получение(создание) диалога между пользователями")
-    @GetMapping(value = "/recipientId", produces = MediaType.APPLICATION_JSON_VALUE)
-    public DialogDto recipientId(@RequestParam(required = false) String id,
-                                 @RequestParam(name = "conversationPartner1", required = false) Long conversationPartner1,
-                                 @RequestParam(name = "conversationPartner2", required = false) Long conversationPartner2) {
-        return dialogService.getDialogOrCreate(id, conversationPartner1, conversationPartner2);
-    }
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
@@ -126,4 +127,5 @@ public class MessageControllers {
                                           @RequestParam(defaultValue = "5") Integer limit) {
         return messageService.getMessagesForDialog(companionId, offset, limit);
     }
+
 }

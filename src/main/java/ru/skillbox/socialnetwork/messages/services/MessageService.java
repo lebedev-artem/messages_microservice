@@ -15,6 +15,5 @@ import java.util.UUID;
 public interface MessageService {
 	Object createMessage(MessageDto messageDto);
 	Object changeMessageStatus(UUID dialogId);
-
 	List<MessageShortDto> getMessagesForDialog(Long companionId, Integer offset, Integer limit);
 }

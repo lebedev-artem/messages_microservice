@@ -11,7 +11,7 @@ spring:
   datasource:
     platform: postgres
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://5.63.154.191:5432/messages
+    url: jdbc:postgresql://5.63.154.191:5432/messagestest
     username: selectel
     password: selectel
   liquibase:

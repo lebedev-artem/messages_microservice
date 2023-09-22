@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +14,6 @@ import ru.skillbox.socialnetwork.messages.client.UsersClient;
 import ru.skillbox.socialnetwork.messages.client.dto.AccountDto;
 import ru.skillbox.socialnetwork.messages.dto.*;
 import ru.skillbox.socialnetwork.messages.exception.ErrorResponse;
-import ru.skillbox.socialnetwork.messages.exception.exceptions.UserPrincipalsNotFound;
 import ru.skillbox.socialnetwork.messages.models.AuthorModel;
 import ru.skillbox.socialnetwork.messages.models.DialogModel;
 import ru.skillbox.socialnetwork.messages.models.MessageModel;
@@ -41,125 +38,124 @@ public class DialogServiceImp implements DialogService {
     private final ObjectMapper objectMapper;
     private final UsersClient usersClient;
     private final AuthorRepository authorRepository;
-
-    @Override
-    @Transactional
-    public Object getDialogOrCreate(@NotNull DialogDto dialogDto) {
-        AuthorModel am = new AuthorModel();
-        MessageModel mm = new MessageModel();
-        DialogModel dm = new DialogModel();
-        AccountDto partnerPrincipal;
-
-        if (dialogRepository.existsByConversationAuthorAndConversationPartner
-                (getPrincipalId(), dialogDto.getConversationPartner().getId())) {
-            return new ResponseEntity<>(new ErrorResponse("Dialog already exists", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
-        } else if (dialogDto.getConversationPartner().getId() != null) {
-            try {
-                partnerPrincipal = usersClient.getUserDetailsById(dialogDto.getConversationPartner().getId());
-            } catch (RuntimeException e) {
-                throw new UserPrincipalsNotFound("User with id " + dialogDto.getConversationPartner().getId() + " does not exist");
-            }
-            Optional<AuthorModel> amO = Optional.ofNullable(authorRepository.findById(partnerPrincipal.getId()).orElse(AuthorModel.builder()
-                    .id(partnerPrincipal.getId())
-                    .firstName(partnerPrincipal.getFirstName())
-                    .lastName(partnerPrincipal.getLastName())
-                    .photo(partnerPrincipal.getPhoto())
-                    .build()));
-            if (amO.isPresent()) {
-                am = amO.get();
-            }
-            mm = MessageModel.builder()
-                    .isDeleted(false)
-                    .time(new Timestamp(System.currentTimeMillis()))
-                    .author(am)
-                    .messageText("")
-                    .status(EMessageStatus.SENT)
-                    .dialogId(null) // for test
-                    .build();
-            dm = DialogModel.builder()
-                    .isDeleted(false)
-                    .unreadCount(0)
-                    .conversationAuthor(getPrincipalId())
-                    .conversationPartner(dialogDto.getConversationPartner().getId())
-                    .lastMessage(mm)
-                    .build();
-            dialogRepository.save(dm);
-            mm.setDialogId(dm.getId());
-        }
-        log.info(" * Dialog {} saved", dm.getId());
-        DialogDto dd = DialogDto.builder()
-                .unreadCount(dm.getUnreadCount())
-                .conversationPartner(modelMapper.map(am, AuthorDto.class))
-                .lastMessage(modelMapper.map(mm, MessageDto.class))
-                .build();
-
-        return new ResponseEntity<>(dd, HttpStatus.OK);
-    }
-
-    @Nullable
-    private AuthorDto getAuthorFromId(Long id) {
-        Optional<AuthorModel> amO =
-                Optional.ofNullable(
-                        authorRepository.findById(id).orElseThrow(
-                                () -> new UserPrincipalsNotFound("User with id " + id + " does not exist")));
-        AuthorModel am;
-        if (amO.isEmpty()) {
-            log.error(" * User with id " + id + " does not exist");
-            throw new UserPrincipalsNotFound("User with id " + id + " does not exist");
-        }
-        am = amO.get();
-        return modelMapper.map(am, AuthorDto.class);
-    }
+	private final CustomMapper customMapper;
 
 
-    @Override
-    public Object getDialogs(Pageable pageable) {
-        Long conversationAuthor = getPrincipalId();
-        Set<DialogModel> dmSet = dialogRepository.findByConversationAuthor(conversationAuthor);
-        List<DialogDto> ddSet = new ArrayList<>();
-        for (DialogModel dm : dmSet) {
-            Optional<MessageModel> mm = messageRepository.findById(dm.getLastMessage().getId());
-            DialogDto dd = DialogDto.builder()
-                    .unreadCount(dm.getUnreadCount())
-                    .conversationPartner(getAuthorFromId(dm.getConversationPartner()))
-                    .lastMessage(new MessageDto(mm.get().getTime(), mm.get().getAuthor().getId(), mm.get().getMessageText())).build();
-            ddSet.add(dd);
-        }
-        Page<DialogDto> p = new PageImpl<>(ddSet, pageable, ddSet.size());
+	/*
+	Tested locally
+    */
+	@Override
+	@Transactional
+	public Object createDialog(@NotNull DialogDto dialogDto) {
+//		init section
+		MessageModel mm = new MessageModel();
+		DialogModel dm = new DialogModel();
+		AccountDto paPrincipal;
+		AccountDto auPrincipal;
+		long conversationAuthorId = dialogDto.getConversationAuthor().getId();
+		long conversationPartnerId = dialogDto.getConversationPartner().getId();
+		AuthorModel aum = customMapper.getAuthorModelFromId(conversationAuthorId);
+		AuthorModel pam = customMapper.getAuthorModelFromId(conversationPartnerId);
+		paPrincipal = customMapper.getAccountPrincipals(dialogDto.getConversationPartner().getId());
+		auPrincipal = customMapper.getAccountPrincipals(dialogDto.getConversationAuthor().getId());
 
-        return new ResponseEntity<>(p, HttpStatus.OK);
-    }
+//		Trying to get dialog
+		if (dialogRepository.existsByConversationAuthorAndConversationPartner
+				(aum, pam)) {
+			return new ResponseEntity<>(new ErrorResponse("Dialog already exists", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+		}
+//		NON NULL checking
+		if (dialogDto.getConversationPartner().getId() == null | dialogDto.getConversationAuthor().getId() == null) {
+			return new ResponseEntity<>(new ErrorResponse("Wrong data for author / partner", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+		}
 
-    @Override
-    public Object getUnreadCount() {
-        Optional<Object> list = Optional.ofNullable(dialogRepository.findByConversationAuthor(getPrincipalId()));
-        if (list.isPresent()) {
-            List<DialogModel> dialogModelList = (List<DialogModel>) list.get();
-            int unreadCount = dialogModelList.stream().mapToInt(DialogModel::getUnreadCount).sum();
-            UnreadCountDto unreadCountDto = new UnreadCountDto(unreadCount);
-            return new ResponseEntity<>(unreadCountDto, HttpStatus.OK);
-        }
-        return new ResponseEntity<>("Dialogs for user " + getPrincipalId() + " not found", HttpStatus.BAD_REQUEST);
-    }
+//      Ищем в базе author автора и партнера
+		Optional<AuthorModel> aumO = Optional.ofNullable(authorRepository.findById(auPrincipal.getId()).orElse(AuthorModel.builder()
+				.id(auPrincipal.getId())
+				.firstName(auPrincipal.getFirstName())
+				.lastName(auPrincipal.getLastName())
+				.photo(auPrincipal.getPhoto())
+				.build()));
 
-    @Override
-    public DialogDto getDialogOrCreate(String id, Long conversationPartner1, Long conversationPartner2) {
-        if (id == null) {
-            return createDialog(conversationPartner1, conversationPartner2);
-        }
-        Optional<DialogModel> dialogModel = dialogRepository.findById(UUID.fromString(id));
-        return objectMapper.convertValue(dialogModel.orElseThrow(), DialogDto.class);
-    }
+		if (aumO.isPresent()) {
+			aum = aumO.get();
+		} else {
+			new ResponseEntity<>(new ErrorResponse("Wrong author data", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+		}
 
-    private DialogDto createDialog(Long conversationAuthor, Long conversationPartner) {
-        DialogModel dialogModel = DialogModel.builder()
-                .isDeleted(false)
-                .conversationAuthor(conversationAuthor)
-                .conversationPartner(conversationPartner)
-                .unreadCount(0)
-                .lastMessage(new MessageModel())
-                .build();
-        dialogRepository.save(dialogModel);
-        return objectMapper.convertValue(dialogModel, DialogDto.class);
-    }
+		Optional<AuthorModel> pamO = Optional.ofNullable(authorRepository.findById(paPrincipal.getId()).orElse(AuthorModel.builder()
+				.id(paPrincipal.getId())
+				.firstName(paPrincipal.getFirstName())
+				.lastName(paPrincipal.getLastName())
+				.photo(paPrincipal.getPhoto())
+				.build()));
+		if (pamO.isPresent()) {
+			pam = pamO.get();
+		} else  {
+			new ResponseEntity<>(new ErrorResponse("Wrong partner data", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+		}
+//		Создаем сообщение тестовое, оно будет последним в диалоге
+		mm = MessageModel.builder()
+				.isDeleted(false)
+				.time(new Timestamp(System.currentTimeMillis()))
+				.author(customMapper.getAuthorModelFromId(dialogDto.getLastMessage().getAuthor().getId()))
+				.messageText(dialogDto.getLastMessage().getMessageText())
+				.status(EMessageStatus.SENT)
+				.dialogId(null) // will set below
+				.build();
+//		Создаем диалог
+		dm = DialogModel.builder()
+				.isDeleted(false)
+				.unreadCount(1)
+				.conversationAuthor(aum)
+				.conversationPartner(pam)
+				.lastMessage(mm)
+				.build();
+
+		DialogDto dtest = objectMapper.convertValue(dm, DialogDto.class);
+		log.info(dm.toString());
+		log.info(dtest.toString());
+		MessageDto mtest = objectMapper.convertValue(mm, MessageDto.class);
+		log.info(mm.toString());
+		log.info(mtest.toString());
+
+
+//		dialogRepository.save(dm);
+		mm.setDialogId(dm.getId());
+
+		log.info(" * Dialog {} saved", dm.getId());
+//		Пока не используется, выводиться сущность созданная
+		DialogDto dd = DialogDto.builder()
+				.unreadCount(dm.getUnreadCount())
+				.conversationPartner(modelMapper.map(aum, AuthorDto.class))
+				.lastMessage(modelMapper.map(mm, MessageDto.class))
+				.build();
+
+		return new ResponseEntity<>(dm, HttpStatus.OK);
+	}
+
+	/*
+	Tested locally
+	 */
+	@Override
+	public Object getDialogsList(Pageable pageable) {
+		Long conversationAuthorId = getPrincipalId();
+		AuthorModel aum = customMapper.getAuthorModelFromId(conversationAuthorId);
+		Page<DialogModel> p = dialogRepository.findAllByConversationAuthor(aum, pageable);
+		return new ResponseEntity<>(p, HttpStatus.OK);
+	}
+	/*
+	Tested
+    */
+	@Override
+	public Object getUnreadCount() {
+		UnreadCountDto ucd = new UnreadCountDto(0);
+		try {
+			ucd.setCount(dialogRepository.countUnreadCountByConversationAuthorId(getPrincipalId()));
+		} catch (RuntimeException e) {
+			return new ResponseEntity<>("Dialogs for user " + getPrincipalId() + " not found. " + e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+
+		return new ResponseEntity<>(ucd, HttpStatus.OK);
+	}
 }

@@ -94,9 +94,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 				HttpStatus.NOT_FOUND);
 	}
 
-	@ExceptionHandler({UserPrincipalsNotFound.class})
-	public ResponseEntity<ErrorResponse> handleUserPrincipalsNotFound(@NotNull UserPrincipalsNotFound e, WebRequest request) {
-		log.error(" ! GlobalExceptionHandler trap UserPrincipalsNotFound");
+	@ExceptionHandler({UserPrincipalsNotFoundException.class})
+	public ResponseEntity<ErrorResponse> handleUserPrincipalsNotFound(@NotNull UserPrincipalsNotFoundException e, WebRequest request) {
+		log.error(" ! GlobalExceptionHandler trap UserPrincipalsNotFoundException");
 		return new ResponseEntity<>(new ErrorResponse(
 				e.getMessage(), HttpStatus.valueOf(404)),
 				HttpStatus.NOT_FOUND);

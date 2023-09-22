@@ -19,5 +19,7 @@
                                  baseColumnNames="last_message"
                                  referencedTableName="messages"
                                  referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="dialogs" baseColumnNames="conversation_author" constraintName="d_a_fk" referencedTableName="author"
+                                 referencedColumnNames="id"/>
     </changeSet>
 </databaseChangeLog>
