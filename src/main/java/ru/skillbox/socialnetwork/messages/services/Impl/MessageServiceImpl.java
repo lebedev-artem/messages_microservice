@@ -36,6 +36,8 @@ public class MessageServiceImpl implements MessageService {
     private final DialogRepository dialogRepository;
     private final ObjectMapper objectMapper;
 
+    private static Long userId;
+
     /**
      * Потом создаем сообщения к конкретному диалогу.
      * Инкрементим unreadCount
@@ -75,9 +77,14 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<MessageShortDto> getMessagesForDialog(Long companionId, Integer offset, Integer limit) {
-        Page<MessageModel> messageModels = messageRepository.findByDialogId(companionId, PageRequest.of(offset, limit));
+        Page<MessageModel> messageModels = messageRepository
+                .findByConversationAuthorAndConversationPartner(userId, companionId, PageRequest.of(offset, limit));
         return messageModels.stream()
                 .map(messageModel -> objectMapper.convertValue(messageModel, MessageShortDto.class))
                 .collect(Collectors.toList());
+    }
+
+    public void setUserId(Long userId) {
+        MessageServiceImpl.userId = userId;
     }
 }

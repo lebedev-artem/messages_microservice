@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.skillbox.socialnetwork.messages.security.service.UserDetailsServiceImpl;
+import ru.skillbox.socialnetwork.messages.services.Impl.MessageServiceImpl;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -27,6 +28,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 	private String usersMicroService;
 	private final JwtUtils jwtUtils;
 	private final UserDetailsServiceImpl userDetailsService;
+	private final MessageServiceImpl messageService;
 
 
 	@Override
@@ -37,6 +39,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 			String jwt = parseJwt(request);
 			if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
 				String username = jwtUtils.getUserNameFromJwtToken(jwt);
+				Long userId = jwtUtils.getUserId(jwt);
+				messageService.setUserId(userId);
 				log.info(" * Attempting to retrieve user's details from {}", usersMicroService);
 				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
