@@ -74,9 +74,9 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<MessageShortDto> getMessagesForDialog(String recipientid, Integer offset, Integer limit) {
-        Page<MessageModel> messageModels = messageRepository.findByDialogId(UUID.fromString(recipientid), PageRequest.of(offset, limit));
-        return  messageModels.stream()
+    public List<MessageShortDto> getMessagesForDialog(Long companionId, Integer offset, Integer limit) {
+        Page<MessageModel> messageModels = messageRepository.findByDialogId(companionId, PageRequest.of(offset, limit));
+        return messageModels.stream()
                 .map(messageModel -> objectMapper.convertValue(messageModel, MessageShortDto.class))
                 .collect(Collectors.toList());
     }
