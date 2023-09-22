@@ -19,6 +19,7 @@ import ru.skillbox.socialnetwork.messages.security.jwt.AuthEntryPointJwt;
 import ru.skillbox.socialnetwork.messages.security.jwt.AuthTokenFilter;
 import ru.skillbox.socialnetwork.messages.security.jwt.JwtUtils;
 import ru.skillbox.socialnetwork.messages.security.service.UserDetailsServiceImpl;
+import ru.skillbox.socialnetwork.messages.services.Impl.MessageServiceImpl;
 
 /**
  * @author Artem Lebedev | 15/09/2023 - 20:49 <p>
@@ -42,10 +43,11 @@ public class WebSecurityConfig {
 	private final JwtUtils jwtUtils;
 
 	private final AuthEntryPointJwt unauthorizedHandler;
+	private final MessageServiceImpl messageService;
 
 	@Bean
 	public AuthTokenFilter authenticationJwtTokenFilter() {
-		return new AuthTokenFilter(jwtUtils, userDetailsService);
+		return new AuthTokenFilter(jwtUtils, userDetailsService, messageService);
 	}
 
 	@Bean
