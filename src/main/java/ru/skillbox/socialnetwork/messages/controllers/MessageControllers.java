@@ -121,7 +121,7 @@ public class MessageControllers {
             @ApiResponse(responseCode = "400", description = "Bad request")})
     @Operation(summary = "Получение сообщений сообщений диалога")
     @GetMapping(value = "/messages")
-    public List<MessageShortDto> messages(@RequestParam(name = "companionId") String companionId,
+    public List<MessageShortDto> messages(@RequestParam(name = "companionId") Long companionId,
                                           @RequestParam(defaultValue = "0") Integer offset,
                                           @RequestParam(defaultValue = "5") Integer limit) {
         return messageService.getMessagesForDialog(companionId, offset, limit);

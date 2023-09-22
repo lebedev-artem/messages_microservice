@@ -16,7 +16,7 @@ public interface MessageRepository extends JpaRepository<MessageModel, UUID> {
 
 	Optional<List<MessageModel>> findByDialogId(UUID dialogId);
 
-	Page<MessageModel> findByDialogId(UUID uuid, Pageable pageable);
+	Page<MessageModel> findByDialogId(Long uuid, Pageable pageable);
 
 
 

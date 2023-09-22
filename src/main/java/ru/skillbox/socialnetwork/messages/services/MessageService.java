@@ -14,5 +14,5 @@ public interface MessageService {
 	Object createMessage(MessageDto messageDto);
 	Object changeMessageStatus(UUID dialogId);
 
-	List<MessageShortDto> getMessagesForDialog(String recipientid, Integer offset, Integer limit);
+	List<MessageShortDto> getMessagesForDialog(Long companionId, Integer offset, Integer limit);
 }
