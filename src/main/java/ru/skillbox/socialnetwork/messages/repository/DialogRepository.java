@@ -6,9 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import ru.skillbox.socialnetwork.messages.models.DialogModel;
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.skillbox.socialnetwork.messages.models.MessageModel;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -18,7 +16,7 @@ public interface DialogRepository extends JpaRepository<DialogModel, UUID> {
 	Page<DialogModel> findAllByConversationAuthor(Long conversationAuthor, @NotNull Pageable pageable);
 	Set<DialogModel> findByConversationAuthor(Long conversationAuthor);
 	Boolean existsByConversationAuthorAndConversationPartner(Long conversationAuthor, Long conversationPartner);
-	UUID findByConversationAuthorAndConversationPartner(Long conversationAuthor, Long conversationPartner);
+	DialogModel findByConversationAuthorAndConversationPartner(Long conversationAuthor, Long conversationPartner);
 
 
 }

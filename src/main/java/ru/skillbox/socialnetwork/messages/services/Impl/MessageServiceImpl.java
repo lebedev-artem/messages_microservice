@@ -78,10 +78,10 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<MessageShortDto> getMessagesForDialog(Long companionId, Integer offset, Integer limit) {
-        UUID dialogId = dialogRepository
+        DialogModel dialogId = dialogRepository
                 .findByConversationAuthorAndConversationPartner(userId, companionId);
 
-        Optional<MessageModel> messageModels = messageRepository.findById(dialogId);
+        Optional<MessageModel> messageModels = messageRepository.findById(dialogId.getId());
         return messageModels.stream()
                 .map(messageModel -> objectMapper.convertValue(messageModel, MessageShortDto.class))
                 .collect(Collectors.toList());
