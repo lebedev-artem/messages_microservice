@@ -23,6 +23,7 @@ import ru.skillbox.socialnetwork.messages.services.MessageService;
 
 import javax.validation.Valid;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
 
 import static ru.skillbox.socialnetwork.messages.dto.EMessageStatus.READ;
@@ -120,8 +121,9 @@ public class MessageControllers {
             @ApiResponse(responseCode = "400", description = "Bad request")})
     @Operation(summary = "Получение сообщений сообщений диалога")
     @GetMapping(value = "/messages")
-    public PageMessageShortDto messages(@RequestParam(name = "recipientid") String recipientid,
-                                        @RequestParam(name = "pageable", required = false) Pageable pageable) {
-        return messageService.getMessagesForDialog(recipientid, pageable);
+    public List<MessageShortDto> messages(@RequestParam(name = "recipientid") String recipientid,
+                                          @RequestParam(defaultValue = "0") Integer offset,
+                                          @RequestParam(defaultValue = "5") Integer limit) {
+        return messageService.getMessagesForDialog(recipientid, offset, limit);
     }
 }

@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -53,9 +53,9 @@ public class MessageServiceImpl implements MessageService {
             dm.get().setUnreadCount(dm.get().getUnreadCount() + 1);
         }
 
-		messageRepository.save(mm);
-		return new ResponseEntity<>(modelMapper.map(mm, MessageDto.class), HttpStatus.OK);
-	}
+        messageRepository.save(mm);
+        return new ResponseEntity<>(modelMapper.map(mm, MessageDto.class), HttpStatus.OK);
+    }
 
     @Override
     @Transactional
@@ -70,29 +70,14 @@ public class MessageServiceImpl implements MessageService {
             }
             return new ResponseEntity<>(HttpStatus.OK);
         }
-
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     @Override
-    public PageMessageShortDto getMessagesForDialog(String recipientid, Pageable pageable) {
-
-        Page<MessageModel> messageModels = messageRepository.findByDialogId(UUID.fromString(recipientid), pageable);
-        List<MessageShortDto> messageShortDtoList = messageModels.stream()
+    public List<MessageShortDto> getMessagesForDialog(String recipientid, Integer offset, Integer limit) {
+        Page<MessageModel> messageModels = messageRepository.findByDialogId(UUID.fromString(recipientid), PageRequest.of(offset, limit));
+        return  messageModels.stream()
                 .map(messageModel -> objectMapper.convertValue(messageModel, MessageShortDto.class))
                 .collect(Collectors.toList());
-
-        return PageMessageShortDto.builder()
-                .size(messageModels.getSize())
-                .last(true)
-                .first(true)
-                .sort(null)
-                .totalPages(0)
-                .empty(true)
-                .numberOfElements(1)
-                .content(messageShortDtoList)
-                .pageable(null)
-                .totalElements(1)
-                .build();
     }
 }
