@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -77,8 +78,10 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<MessageShortDto> getMessagesForDialog(Long companionId, Integer offset, Integer limit) {
-        Page<MessageModel> messageModels = messageRepository
-                .findByConversationAuthorAndConversationPartner(userId, companionId, PageRequest.of(offset, limit));
+        UUID dialogId = dialogRepository
+                .findByConversationAuthorAndConversationPartner(userId, companionId);
+
+        Optional<MessageModel> messageModels = messageRepository.findById(dialogId);
         return messageModels.stream()
                 .map(messageModel -> objectMapper.convertValue(messageModel, MessageShortDto.class))
                 .collect(Collectors.toList());

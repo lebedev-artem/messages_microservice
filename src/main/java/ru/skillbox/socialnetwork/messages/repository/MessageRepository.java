@@ -18,8 +18,4 @@ public interface MessageRepository extends JpaRepository<MessageModel, UUID> {
 
 	Optional<List<MessageModel>> findByDialogId(UUID dialogId);
 
-	Page<MessageModel> findByConversationAuthorAndConversationPartner(Long conversationAuthor,Long conversationPartner, Pageable pageable);
-
-
-
 }
