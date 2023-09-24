@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.skillbox.socialnetwork.messages.dto.MessageDto;
 import ru.skillbox.socialnetwork.messages.dto.MessageShortDto;
+import ru.skillbox.socialnetwork.messages.dto.MessageShortTestDto;
 import ru.skillbox.socialnetwork.messages.models.MessageModel;
 
 import java.util.List;
