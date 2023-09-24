@@ -1,6 +1,5 @@
 package ru.skillbox.socialnetwork.messages.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -44,8 +43,11 @@ public class MessageModel {
 	@Column(name = "time")
 	private Timestamp time;
 	@OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
-	@JoinColumn(name = "author_id")
+	@JoinColumn(name = "author")
 	private AuthorModel author;
+	@OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
+	@JoinColumn(name = "partner")
+	private AuthorModel partner;
 	@Column(name = "message_text")
 	private String messageText;
 	@Column(name = "status")

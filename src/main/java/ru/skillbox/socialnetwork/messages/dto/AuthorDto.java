@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
+
 /**
  * @author Artem Lebedev | 20/09/2023 - 11:42 <p><p>
  * Заполняется на основе данных из базы users<p>

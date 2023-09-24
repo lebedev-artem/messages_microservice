@@ -1,10 +1,11 @@
 package ru.skillbox.socialnetwork.messages.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.util.UUID;
 
 @Data
 @Schema
@@ -14,22 +15,14 @@ import java.time.LocalDateTime;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageShortDto {
 
-    @NonNull
-    String id;
-
-    boolean isDeleted;
-
-    //Дата и время отправки
-    LocalDateTime time;
-
-    //UUID первого собеседника
-    @NonNull
-    Long conversationPartner1;
-
-    //UUID второго собеседника
-    @NonNull
-    Long conversationPartner2;
-
-    //Текст сообщения
-    String messageText;
+    @JsonIgnore
+	private UUID id;
+	private Boolean isDeleted;
+	@NonNull
+	private Timestamp time;
+	@NonNull
+	private AuthorDto author;
+	@NonNull
+	private AuthorDto partner;
+	private String messageText;
 }
