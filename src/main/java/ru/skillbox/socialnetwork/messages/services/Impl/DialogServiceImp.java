@@ -152,7 +152,7 @@ public class DialogServiceImp implements DialogService {
 		Long authorId = getPrincipalId();
 		AuthorModel aum = customMapper.getAuthorModelFromId(authorId);
 		Optional<Page<DialogModel>> p = Optional.ofNullable(Optional.of(dialogRepository
-						.findAllByConversationAuthor(aum, pageable))
+						.findAllByConversationAuthor(aum, Pageable.unpaged()))
 				.orElseThrow(() -> new DialogNotFoundException("Dialogs for Author id " + authorId + " not found")));
 		log.info(" * Dialogs for Author {} contains {} elements", authorId, p.get().getTotalElements());
 		return new ResponseEntity<>(p.get(), HttpStatus.OK);
