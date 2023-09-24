@@ -18,10 +18,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import ru.skillbox.socialnetwork.messages.models.MessageModel;
 import ru.skillbox.socialnetwork.messages.services.DialogService;
 import ru.skillbox.socialnetwork.messages.services.MessageService;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -110,8 +112,8 @@ public class MessageControllers {
     @Operation(summary = "Получение сообщений сообщений диалога")
     @GetMapping(value = "/messages")
     public Object messages(@RequestParam(name = "companionId") Long companionId,
-                                          @RequestParam(defaultValue = "0") Integer page,
-                                          @RequestParam(defaultValue = "1") Integer size) {
+                                       @RequestParam(defaultValue = "0") Integer page,
+                                       @RequestParam(defaultValue = "1") Integer size) {
         log.info(" * GET \"/messages\"");
         log.info(" * Payload: companionId={}, offset={}, limit={}", companionId, page, size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("time").ascending());
