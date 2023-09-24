@@ -18,11 +18,8 @@ public class MessageShortDto {
     @JsonIgnore
 	private UUID id;
 	private Boolean isDeleted;
-	@NonNull
 	private Timestamp time;
-	@NonNull
-	private AuthorDto author;
-	@NonNull
-	private AuthorDto partner;
+	private AuthorDto conversationAuthor;
+	private AuthorDto conversationPartner;
 	private String messageText;
 }

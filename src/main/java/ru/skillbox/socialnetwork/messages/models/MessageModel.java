@@ -44,10 +44,10 @@ public class MessageModel {
 	private Timestamp time;
 	@OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
 	@JoinColumn(name = "author")
-	private AuthorModel author;
+	private AuthorModel conversationAuthor;
 	@OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
 	@JoinColumn(name = "partner")
-	private AuthorModel partner;
+	private AuthorModel conversationPartner;
 	@Column(name = "message_text")
 	private String messageText;
 	@Column(name = "status")

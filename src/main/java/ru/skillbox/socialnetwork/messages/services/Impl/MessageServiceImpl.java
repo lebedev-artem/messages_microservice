@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +23,7 @@ import ru.skillbox.socialnetwork.messages.services.MessageService;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,17 +51,17 @@ public class MessageServiceImpl implements MessageService {
 
 		MessageModel mm = modelMapper.map(messageDto, MessageModel.class);
 		Optional<AuthorModel> aum = Optional.of(authorRepository
-				.findById(mm.getAuthor().getId())
-				.orElse(customMapper.getAuthorModelFromId(mm.getAuthor().getId())));
+				.findById(mm.getConversationAuthor().getId())
+				.orElse(customMapper.getAuthorModelFromId(mm.getConversationAuthor().getId())));
 		Optional<AuthorModel> pam = Optional.of(authorRepository
-				.findById(mm.getPartner().getId())
-				.orElse(customMapper.getAuthorModelFromId(mm.getPartner().getId())));
+				.findById(mm.getConversationPartner().getId())
+				.orElse(customMapper.getAuthorModelFromId(mm.getConversationPartner().getId())));
 
 		MessageModel fmm = MessageModel.builder()
 				.isDeleted(false)
 				.time(mm.getTime() == null ? new Timestamp(System.currentTimeMillis()) : mm.getTime())
-				.author(aum.get())
-				.partner(pam.get())
+				.conversationAuthor(aum.get())
+				.conversationPartner(pam.get())
 				.messageText(mm.getMessageText())
 				.status(EMessageStatus.SENT)
 				.dialogId(mm.getDialogId())
@@ -81,7 +81,7 @@ public class MessageServiceImpl implements MessageService {
 	public Object changeMessageStatus(Long authorId) {
 		Optional<List<MessageModel>> mmList =
 				Optional.ofNullable(messageRepository
-						.findByAuthorId(authorId)
+						.findByConversationAuthorId(authorId)
 						.orElseThrow(() -> new DialogNotFoundException("Dialog with author id " + authorId + " not found")));
 		if (mmList.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -96,21 +96,24 @@ public class MessageServiceImpl implements MessageService {
 		Optional<DialogModel> dialogModel = Optional.ofNullable(dialogRepository
 				.findByConversationAuthorAndConversationPartner(customMapper.getAuthorModelFromId(userId), customMapper.getAuthorModelFromId(partnerId)));
 
-		Optional<Page<MessageModel>> messageModels;
-		AuthorModel aum = customMapper.getAuthorModelFromId(partnerId);
+		Optional<List<MessageModel>> messageList;
+		AuthorModel pam = customMapper.getAuthorModelFromId(partnerId);
 
 		if (dialogModel.isPresent()) {
-			messageModels = messageRepository.findByAuthorAndDialogId(aum, dialogModel.get().getId(), pageable);
+			messageList = messageRepository.findAllByConversationAuthorAndDialogId(pam, dialogModel.get().getId());
 		} else
 			return new ResponseEntity<>(new ErrorResponse("Dialog satisfying to conditions not found", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
 
-        MessageShortDto msd = new MessageShortDto();
-		if (messageModels.isEmpty()) {
+		if (messageList.isEmpty()) {
 			return new ResponseEntity<>(new ErrorResponse("Messages not found", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
 		}
-		msd = modelMapper.map(messageModels.get().getContent().get(0), MessageShortDto.class);
+		List<MessageShortDto> msdList = new ArrayList<>();
 
-		return new ResponseEntity<>(msd, HttpStatus.OK);
+		for (MessageModel mm : messageList.get()) {
+			msdList.add(modelMapper.map(mm, MessageShortDto.class));
+		}
+
+		return new ResponseEntity<>(msdList, HttpStatus.OK);
 	}
 
 	public void setUserId(Long userId) {
