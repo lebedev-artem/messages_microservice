@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.jetbrains.annotations.Nullable;
 
 /**
  *     private Integer unreadCount<p>
@@ -25,5 +26,6 @@ public class DialogDto {
     private Integer unreadCount;
     private AuthorDto conversationAuthor;
     private AuthorDto conversationPartner;
+    @Nullable
     private MessageDto lastMessage;
 }

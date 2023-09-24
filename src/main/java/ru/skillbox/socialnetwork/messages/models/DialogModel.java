@@ -54,8 +54,8 @@ public class DialogModel {
 			referencedColumnName = "id", name = "conversation_author", nullable = false, updatable = false)
 	private AuthorModel conversationAuthor;
 
-	@OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
-	@JoinColumn(name = "conversation_partner", nullable = false, columnDefinition = "LONG")
+	@OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE}, optional = false)
+	@JoinColumn(name = "conversation_partner", nullable = false, updatable = false, columnDefinition = "LONG")
 	private AuthorModel conversationPartner;
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})

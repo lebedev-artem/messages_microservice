@@ -21,5 +21,7 @@
                                  referencedColumnNames="id"/>
         <addForeignKeyConstraint baseTableName="dialogs" baseColumnNames="conversation_author" constraintName="d_a_fk" referencedTableName="author"
                                  referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="dialogs" baseColumnNames="conversation_partner" constraintName="d_p_fk" referencedTableName="author"
+                                 referencedColumnNames="id"/>
     </changeSet>
 </databaseChangeLog>
