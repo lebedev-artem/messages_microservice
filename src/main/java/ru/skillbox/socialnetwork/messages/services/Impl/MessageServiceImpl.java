@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.skillbox.socialnetwork.messages.client.UsersClient;
 import ru.skillbox.socialnetwork.messages.dto.*;
-import ru.skillbox.socialnetwork.messages.exception.ErrorResponse;
 import ru.skillbox.socialnetwork.messages.exception.exceptions.DialogNotFoundException;
 import ru.skillbox.socialnetwork.messages.models.AuthorModel;
 import ru.skillbox.socialnetwork.messages.models.DialogModel;
@@ -27,6 +26,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author Artem Lebedev | 18/09/2023 - 00:14
@@ -107,13 +107,20 @@ public class MessageServiceImpl implements MessageService {
 			throw new DialogNotFoundException("Dialog satisfying to conditions not found");
 		}
 
-		List<MessageShortDto> msdList = new ArrayList<>();
+		List<MessageShortTestDto> msdList = new ArrayList<>();
 
 		for (MessageModel mm : messageList.get()) {
-			msdList.add(modelMapper.map(mm, MessageShortDto.class));
+
+			msdList.add(new MessageShortTestDto(
+					mm.getId(),
+					false,
+					mm.getTime().toLocalDateTime(),
+					mm.getConversationAuthor().getId(),
+					mm.getConversationPartner().getId(),
+					mm.getMessageText()));
 		}
 
-		return mmListP;
+		return msdList;
 	}
 
 	public void setUserId(Long userId) {

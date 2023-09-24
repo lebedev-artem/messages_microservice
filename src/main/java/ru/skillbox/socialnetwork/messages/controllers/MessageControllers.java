@@ -106,14 +106,28 @@ public class MessageControllers {
         return dialogService.getUnreadCount();
     }
 
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Successful operation"),
+//            @ApiResponse(responseCode = "400", description = "Bad request")})
+//    @Operation(summary = "Получение сообщений сообщений диалога")
+//    @GetMapping(value = "/messages")
+//    public Object messages(@RequestParam(name = "companionId") Long companionId,
+//                                       @RequestParam(defaultValue = "0") Integer page,
+//                                       @RequestParam(defaultValue = "1") Integer size) {
+//        log.info(" * GET \"/messages\"");
+//        log.info(" * Payload: companionId={}, offset={}, limit={}", companionId, page, size);
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("time").ascending());
+//        return messageService.getMessagesFromPartner(companionId, pageable);
+//    }
+
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "400", description = "Bad request")})
     @Operation(summary = "Получение сообщений сообщений диалога")
     @GetMapping(value = "/messages")
     public Object messages(@RequestParam(name = "companionId") Long companionId,
-                                       @RequestParam(defaultValue = "0") Integer page,
-                                       @RequestParam(defaultValue = "1") Integer size) {
+                           @RequestParam(defaultValue = "0") Integer page,
+                           @RequestParam(defaultValue = "1") Integer size) {
         log.info(" * GET \"/messages\"");
         log.info(" * Payload: companionId={}, offset={}, limit={}", companionId, page, size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("time").ascending());
