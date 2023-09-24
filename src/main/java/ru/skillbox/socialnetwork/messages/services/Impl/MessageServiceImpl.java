@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -98,22 +99,21 @@ public class MessageServiceImpl implements MessageService {
 
 		Optional<List<MessageModel>> messageList;
 		AuthorModel pam = customMapper.getAuthorModelFromId(partnerId);
-
+		Page<List<MessageModel>> mmListP;
 		if (dialogModel.isPresent()) {
 			messageList = messageRepository.findAllByConversationAuthorAndDialogId(pam, dialogModel.get().getId());
-		} else
-			return new ResponseEntity<>(new ErrorResponse("Dialog satisfying to conditions not found", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
-
-		if (messageList.isEmpty()) {
-			return new ResponseEntity<>(new ErrorResponse("Messages not found", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+			mmListP = messageRepository.findAllByConversationAuthorAndDialogId(pam, dialogModel.get().getId(), Pageable.unpaged());
+		} else {
+			throw new DialogNotFoundException("Dialog satisfying to conditions not found");
 		}
+
 		List<MessageShortDto> msdList = new ArrayList<>();
 
 		for (MessageModel mm : messageList.get()) {
 			msdList.add(modelMapper.map(mm, MessageShortDto.class));
 		}
 
-		return new ResponseEntity<>(msdList, HttpStatus.OK);
+		return mmListP;
 	}
 
 	public void setUserId(Long userId) {
