@@ -75,23 +75,50 @@ public class MessageServiceImpl implements MessageService {
 	 */
 	@Override
 	@Transactional
-	public Object changeMessageStatus(Long authorId) {
+	public Object changeMessageStatus(Long partnerId) {
+		Optional<DialogModel> dm;
+		dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(
+				customMapper.getAuthorModelFromId(userId),
+				customMapper.getAuthorModelFromId(partnerId)));
+
+		if (dm.isEmpty()) {
+			dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(
+					customMapper.getAuthorModelFromId(partnerId),
+					customMapper.getAuthorModelFromId(userId)));
+		}
+		if (dm.isEmpty()) {
+			throw new DialogNotFoundException("Dialog with income conditions not found");
+		}
+
+		log.info(" * Found dialog with id {}", dm.get().getId());
+
 		Optional<List<MessageModel>> mmList =
 				Optional.ofNullable(messageRepository
-						.findByAuthorId(authorId)
-						.orElseThrow(() -> new DialogNotFoundException("Dialog with author id " + authorId + " not found")));
+						.findByDialogId(dm.get().getId())
+						.orElseThrow(() -> new DialogNotFoundException("No message found for dialog")));
 		if (mmList.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		mmList.get().forEach(m -> m.setStatus(EMessageStatus.READ));
-		log.info(" * Status of messages for {} changed to READ", authorId);
+		log.info(" * Status of messages for {} changed to READ", partnerId);
+		dialogRepository.setUnreadCountToZero(dm.get().getId());
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
 	public Object getMessagesForDialog(Long partnerId, Pageable pageable) {
-		Optional<DialogModel> dialogModel = Optional.ofNullable(dialogRepository
-				.findByConversationAuthorAndConversationPartner(customMapper.getAuthorModelFromId(userId), customMapper.getAuthorModelFromId(partnerId)));
+		Optional<DialogModel> dialogModel;
+		dialogModel = Optional.ofNullable(
+				dialogRepository.findByConversationAuthorAndConversationPartner(
+						customMapper.getAuthorModelFromId(userId),
+						customMapper.getAuthorModelFromId(partnerId)));
+
+		if (dialogModel.isEmpty()) {
+			dialogModel = Optional.ofNullable(
+					dialogRepository.findByConversationAuthorAndConversationPartner(
+							customMapper.getAuthorModelFromId(partnerId),
+							customMapper.getAuthorModelFromId(userId)));
+		}
 
 		Optional<List<MessageModel>> messageList;
 		AuthorModel pam = customMapper.getAuthorModelFromId(partnerId);

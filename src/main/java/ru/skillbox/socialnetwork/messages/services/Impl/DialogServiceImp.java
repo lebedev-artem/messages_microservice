@@ -50,6 +50,7 @@ public class DialogServiceImp implements DialogService {
 //		init section
 		MessageModel mm = new MessageModel();
 		DialogModel dm = new DialogModel();
+//		DialogModel revdm = new DialogModel();
 		AccountDto paPrincipal;
 		AccountDto auPrincipal;
 		long conversationAuthorId = dialogDto.getConversationAuthor().getId();
@@ -67,6 +68,14 @@ public class DialogServiceImp implements DialogService {
 					new ErrorResponse("Dialog with income conditions already exists", HttpStatus.BAD_REQUEST),
 					HttpStatus.BAD_REQUEST);
 		}
+		if (dialogRepository.existsByConversationAuthorAndConversationPartner
+				(pam, aum)) {
+			log.error(" ! Dialog with income conditions already exists");
+			return new ResponseEntity<>(
+					new ErrorResponse("Dialog with income conditions already exists", HttpStatus.BAD_REQUEST),
+					HttpStatus.BAD_REQUEST);
+		}
+
 //		NON NULL checking
 		if (dialogDto.getConversationPartner().getId() == null | dialogDto.getConversationAuthor().getId() == null) {
 			log.error(" ! Author or partner id is NULL");
@@ -121,25 +130,34 @@ public class DialogServiceImp implements DialogService {
 				.unreadCount(dm.getLastMessage() != null ? 1 : 0)
 				.conversationAuthor(aum)
 				.conversationPartner(pam)
-				.lastMessage(null)
+				.lastMessage(new MessageModel())
 				.build();
+//		Создаем диалог для партнера
+//		revdm = dm;
+//		Меняем местами автора и партнера
+//		revdm.setConversationAuthor(pam);
+//		revdm.setConversationPartner(aum);
 
 //		test mapping
-		DialogDto dtest = objectMapper.convertValue(dm, DialogDto.class);
-		log.info(dm.toString());
-		log.info(dtest.toString());
-		MessageDto mtest = objectMapper.convertValue(mm, MessageDto.class);
-		log.info(mm.toString());
-		log.info(mtest.toString());
+//		DialogDto dtest = objectMapper.convertValue(dm, DialogDto.class);
+//		log.info(dm.toString());
+//		log.info(dtest.toString());
+//		MessageDto mtest = objectMapper.convertValue(mm, MessageDto.class);
+//		log.info(mm.toString());
+//		log.info(mtest.toString());
 //		end test mapping
 
 		dialogRepository.save(dm);
+//		dialogRepository.save(revdm);
 //		mm.setDialogId(dm.getId());
 
 		log.info(" * Dialog {} saved", dm.getId());
+//		log.info(" * Dialog {} saved", revdm.getId());
 
 //		mapping Model to DTO for output
 		DialogDto ddto = objectMapper.convertValue(dm, DialogDto.class);
+//		DialogDto revddto = objectMapper.convertValue(revdm, DialogDto.class);
+//		String output = ddto.toString().concat(revddto.toString());
 
 		return new ResponseEntity<>(ddto, HttpStatus.OK);
 	}
@@ -151,11 +169,12 @@ public class DialogServiceImp implements DialogService {
 	public Object getDialogsList(Pageable pageable) {
 		Long authorId = getPrincipalId();
 		AuthorModel aum = customMapper.getAuthorModelFromId(authorId);
-		Optional<Page<DialogModel>> p = Optional.ofNullable(Optional.of(dialogRepository
-						.findAllByConversationAuthor(aum, Pageable.unpaged()))
-				.orElseThrow(() -> new DialogNotFoundException("Dialogs for Author id " + authorId + " not found")));
-		log.info(" * Dialogs for Author {} contains {} elements", authorId, p.get().getTotalElements());
-		return new ResponseEntity<>(p.get(), HttpStatus.OK);
+		Optional<Page<DialogModel>> dialogsPage = Optional.ofNullable(dialogRepository.findAllByConversationAuthorOrConversationPartner(aum, aum, Pageable.unpaged()));
+		if (dialogsPage.isEmpty()) {
+			throw new DialogNotFoundException("Dialogs for Author id " + authorId + " not found");
+		}
+		log.info(" * Dialogs for Author {} contains {} elements", authorId, dialogsPage.get().getTotalElements());
+		return new ResponseEntity<>(dialogsPage.get(), HttpStatus.OK);
 	}
 
 	/*

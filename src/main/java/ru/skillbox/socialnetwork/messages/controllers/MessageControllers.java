@@ -40,8 +40,8 @@ public class MessageControllers {
             @ApiResponse(responseCode = "400", description = "Bad request")})
     @Operation(summary = "Обновление статуса сообщений")
     @PutMapping(path = "/{userId}")
-    public Object changeMessageStatus(@PathVariable(value = "userId") Long userId) {
-        return messageService.changeMessageStatus(userId);
+    public Object changeMessageStatus(@PathVariable(value = "userId") Long partnerId) {
+        return messageService.changeMessageStatus(partnerId);
     }
 
     @ApiResponses(value = {
