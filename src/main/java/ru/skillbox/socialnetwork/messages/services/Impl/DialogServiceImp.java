@@ -175,6 +175,32 @@ public class DialogServiceImp implements DialogService {
 		return new ResponseEntity<>(ucd, HttpStatus.OK);
 	}
 
+	/*
+	Postman tested
+	need refactor
+	 */
+	@Override
+	public DialogDto getDialogOrCreate(UUID dialogId, Long conversationPartner1, Long conversationPartner2) {
+		if (dialogId == null) {
+			return createDialog(conversationPartner1, conversationPartner2);
+		}
+		Optional<DialogModel> dialogModel = dialogRepository.findById(dialogId);
+		return objectMapper.convertValue(dialogModel.orElseThrow(), DialogDto.class);
+	}
+
+	private DialogDto createDialog(Long conversationAuthor, Long conversationPartner) {
+		DialogModel dialogModel = DialogModel.builder()
+				.isDeleted(false)
+				.conversationAuthor(customMapper.getAuthorModelFromId(conversationAuthor))
+				.conversationPartner(customMapper.getAuthorModelFromId(conversationPartner))
+				.unreadCount(0)
+				.lastMessage(new MessageModel())
+				.build();
+		dialogRepository.save(dialogModel);
+		return objectMapper.convertValue(dialogModel, DialogDto.class);
+	}
+
+
 	@Override
 	@Transactional
 	public void setLastMessage(UUID dialogId, MessageModel messageModel) {

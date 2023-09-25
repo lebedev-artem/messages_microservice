@@ -93,7 +93,7 @@ public class MessageServiceImpl implements MessageService {
 	}
 
 	@Override
-	public Object getMessagesFromPartner(Long partnerId, Pageable pageable) {
+	public Object getMessagesForDialog(Long partnerId, Pageable pageable) {
 		Optional<DialogModel> dialogModel = Optional.ofNullable(dialogRepository
 				.findByConversationAuthorAndConversationPartner(customMapper.getAuthorModelFromId(userId), customMapper.getAuthorModelFromId(partnerId)));
 

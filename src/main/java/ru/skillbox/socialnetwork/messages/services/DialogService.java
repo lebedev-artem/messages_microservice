@@ -12,6 +12,8 @@ public interface DialogService {
     Object createDialog(DialogDto dialogDto);
     Object getDialogsList(Pageable pageable);
     Object getUnreadCount();
+
+    DialogDto getDialogOrCreate(UUID id, Long conversationPartner1, Long conversationPartner2);
     void  setLastMessage(UUID dialogId, MessageModel message);
 
     void delDialog(UUID dialogId);

@@ -18,12 +18,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import ru.skillbox.socialnetwork.messages.models.MessageModel;
 import ru.skillbox.socialnetwork.messages.services.DialogService;
 import ru.skillbox.socialnetwork.messages.services.MessageService;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -106,19 +104,16 @@ public class MessageControllers {
         return dialogService.getUnreadCount();
     }
 
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Successful operation"),
-//            @ApiResponse(responseCode = "400", description = "Bad request")})
-//    @Operation(summary = "Получение сообщений сообщений диалога")
-//    @GetMapping(value = "/messages")
-//    public Object messages(@RequestParam(name = "companionId") Long companionId,
-//                                       @RequestParam(defaultValue = "0") Integer page,
-//                                       @RequestParam(defaultValue = "1") Integer size) {
-//        log.info(" * GET \"/messages\"");
-//        log.info(" * Payload: companionId={}, offset={}, limit={}", companionId, page, size);
-//        Pageable pageable = PageRequest.of(page, size, Sort.by("time").ascending());
-//        return messageService.getMessagesFromPartner(companionId, pageable);
-//    }
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "400", description = "Bad request")})
+    @Operation(summary = "Получение(создание) диалога между пользователями")
+    @GetMapping(value = "/recipientId", produces = MediaType.APPLICATION_JSON_VALUE)
+    public DialogDto recipientId(@RequestParam(required = false) UUID id,
+                                 @RequestParam(name = "conversationPartner1", required = false) Long conversationPartner1,
+                                 @RequestParam(name = "conversationPartner2", required = false) Long conversationPartner2) {
+        return dialogService.getDialogOrCreate(id, conversationPartner1, conversationPartner2);
+    }
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
@@ -131,7 +126,7 @@ public class MessageControllers {
         log.info(" * GET \"/messages\"");
         log.info(" * Payload: companionId={}, offset={}, limit={}", companionId, page, size);
         Pageable pageable = PageRequest.of(page, size, Sort.by("time").ascending());
-        return messageService.getMessagesFromPartner(companionId, pageable);
+        return messageService.getMessagesForDialog(companionId, pageable);
     }
     @DeleteMapping(value = "/delDialogById")
     public void delDialog(@RequestParam UUID dialogId) {
