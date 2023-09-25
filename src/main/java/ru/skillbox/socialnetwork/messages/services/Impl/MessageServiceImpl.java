@@ -101,7 +101,8 @@ public class MessageServiceImpl implements MessageService {
 		AuthorModel pam = customMapper.getAuthorModelFromId(partnerId);
 		Page<List<MessageModel>> mmListP;
 		if (dialogModel.isPresent()) {
-			messageList = messageRepository.findAllByConversationAuthorAndDialogId(pam, dialogModel.get().getId());
+			messageList = messageRepository.findByDialogId(dialogModel.get().getId());
+//			messageList = messageRepository.findAllByConversationAuthorAndDialogId(pam, dialogModel.get().getId());
 			mmListP = messageRepository.findAllByConversationAuthorAndDialogId(pam, dialogModel.get().getId(), Pageable.unpaged());
 		} else {
 			throw new DialogNotFoundException("Dialog satisfying to conditions not found");
