@@ -95,11 +95,11 @@ public class MessageServiceImpl implements MessageService {
 
 		Optional<List<MessageModel>> messageList;
 		AuthorModel pam = customMapper.getAuthorModelFromId(partnerId);
-		Page<List<MessageModel>> mmListP;
+		Page<MessageModel> mmListP;
 		if (dialogModel.isPresent()) {
 			messageList = messageRepository.findByDialogId(dialogModel.get().getId());
 //			messageList = messageRepository.findAllByConversationAuthorAndDialogId(pam, dialogModel.get().getId());
-			mmListP = messageRepository.findAllByAuthorAndDialogId(pam, dialogModel.get().getId(), Pageable.unpaged());
+			mmListP = messageRepository.findByDialogId(dialogModel.get().getId(), Pageable.unpaged());
 		} else {
 			throw new DialogNotFoundException("Dialog satisfying to conditions not found");
 		}
@@ -116,7 +116,7 @@ public class MessageServiceImpl implements MessageService {
 					mm.getMessageText()));
 		}
 
-		return msdList;
+		return mmListP;
 	}
 
 	public void setUserId(Long userId) {
