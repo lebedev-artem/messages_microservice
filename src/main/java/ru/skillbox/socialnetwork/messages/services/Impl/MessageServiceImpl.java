@@ -52,17 +52,13 @@ public class MessageServiceImpl implements MessageService {
 
 		MessageModel mm = modelMapper.map(messageDto, MessageModel.class);
 		Optional<AuthorModel> aum = Optional.of(authorRepository
-				.findById(mm.getConversationAuthor().getId())
-				.orElse(customMapper.getAuthorModelFromId(mm.getConversationAuthor().getId())));
-		Optional<AuthorModel> pam = Optional.of(authorRepository
-				.findById(mm.getConversationPartner().getId())
-				.orElse(customMapper.getAuthorModelFromId(mm.getConversationPartner().getId())));
+				.findById(mm.getAuthor().getId())
+				.orElse(customMapper.getAuthorModelFromId(mm.getAuthor().getId())));
 
 		MessageModel fmm = MessageModel.builder()
 				.isDeleted(false)
 				.time(mm.getTime() == null ? new Timestamp(System.currentTimeMillis()) : mm.getTime())
-				.conversationAuthor(aum.get())
-				.conversationPartner(pam.get())
+				.author(aum.get())
 				.messageText(mm.getMessageText())
 				.status(EMessageStatus.SENT)
 				.dialogId(mm.getDialogId())
@@ -82,7 +78,7 @@ public class MessageServiceImpl implements MessageService {
 	public Object changeMessageStatus(Long authorId) {
 		Optional<List<MessageModel>> mmList =
 				Optional.ofNullable(messageRepository
-						.findByConversationAuthorId(authorId)
+						.findByAuthorId(authorId)
 						.orElseThrow(() -> new DialogNotFoundException("Dialog with author id " + authorId + " not found")));
 		if (mmList.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -103,7 +99,7 @@ public class MessageServiceImpl implements MessageService {
 		if (dialogModel.isPresent()) {
 			messageList = messageRepository.findByDialogId(dialogModel.get().getId());
 //			messageList = messageRepository.findAllByConversationAuthorAndDialogId(pam, dialogModel.get().getId());
-			mmListP = messageRepository.findAllByConversationAuthorAndDialogId(pam, dialogModel.get().getId(), Pageable.unpaged());
+			mmListP = messageRepository.findAllByAuthorAndDialogId(pam, dialogModel.get().getId(), Pageable.unpaged());
 		} else {
 			throw new DialogNotFoundException("Dialog satisfying to conditions not found");
 		}
@@ -115,8 +111,8 @@ public class MessageServiceImpl implements MessageService {
 			msdList.add(new MessageShortTestDto(
 					mm.getId(),
 					mm.getTime().toLocalDateTime(),
-					mm.getConversationAuthor().getId(),
-					mm.getConversationPartner().getId(),
+					mm.getAuthor().getId(),
+					partnerId,
 					mm.getMessageText()));
 		}
 

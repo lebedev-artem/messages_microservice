@@ -18,9 +18,9 @@ import java.util.UUID;
 public interface MessageRepository extends JpaRepository<MessageModel, UUID> {
 
 	Optional<List<MessageModel>> findByDialogId(UUID dialogId);
-	Optional<List<MessageModel>> findByConversationAuthorId(Long authorId);
-	Page<List<MessageModel>> findAllByConversationAuthorAndDialogId(AuthorModel authorModel, UUID dialogId, Pageable pageable);
-	Optional<List<MessageModel>> findAllByConversationAuthorAndDialogId(AuthorModel authorModel, UUID dialogId);
+	Optional<List<MessageModel>> findByAuthorId(Long authorId);
+	Page<List<MessageModel>> findAllByAuthorAndDialogId(AuthorModel author, UUID dialogId, Pageable pageable);
+	Optional<List<MessageModel>> findAllByAuthorAndDialogId(AuthorModel author, UUID dialogId);
 
 
 }

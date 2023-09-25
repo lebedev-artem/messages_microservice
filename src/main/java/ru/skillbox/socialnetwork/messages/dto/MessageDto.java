@@ -22,8 +22,8 @@ public class MessageDto {
 
 	private Boolean isDeleted;
 	private Timestamp time;
-	private AuthorDto conversationAuthor;
-	private AuthorDto conversationPartner;
+	private AuthorDto author;
+//	private AuthorDto conversationPartner;
 	private String messageText;
 	private EMessageStatus status;
 	private UUID dialogId;

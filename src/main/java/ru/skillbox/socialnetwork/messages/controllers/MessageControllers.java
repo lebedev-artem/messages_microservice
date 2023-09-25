@@ -108,7 +108,7 @@ public class MessageControllers {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "400", description = "Bad request")})
     @Operation(summary = "Получение(создание) диалога между пользователями")
-    @GetMapping(value = "/recipientId", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/recipientId/", produces = MediaType.APPLICATION_JSON_VALUE)
     public DialogDto recipientId(@RequestParam(required = false) UUID id,
                                  @RequestParam(name = "conversationPartner1", required = false) Long conversationPartner1,
                                  @RequestParam(name = "conversationPartner2", required = false) Long conversationPartner2) {

@@ -26,9 +26,9 @@
             <column name="author" type="BIGINT">
                 <constraints nullable="true"/>
             </column>
-            <column name="partner" type="BIGINT">
-                <constraints nullable="true"/>
-            </column>
+<!--            <column name="partner" type="BIGINT">-->
+<!--                <constraints nullable="true"/>-->
+<!--            </column>-->
             <column name="message_text" type="VARCHAR(768)">
                 <constraints nullable="true"/>
             </column>
