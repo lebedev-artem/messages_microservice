@@ -20,8 +20,6 @@ public class MessageShortTestDto {
 
 	UUID id;
 
-	boolean isDeleted;
-
 	//Дата и время отправки
 	LocalDateTime time;
 

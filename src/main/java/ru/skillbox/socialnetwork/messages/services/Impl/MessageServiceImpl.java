@@ -113,7 +113,6 @@ public class MessageServiceImpl implements MessageService {
 
 			msdList.add(new MessageShortTestDto(
 					mm.getId(),
-					false,
 					mm.getTime().toLocalDateTime(),
 					mm.getConversationAuthor().getId(),
 					mm.getConversationPartner().getId(),
