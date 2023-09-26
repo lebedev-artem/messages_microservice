@@ -42,7 +42,7 @@ public class DialogModel {
 	@Column(name = "unread_count", nullable = false)
 	private Integer unreadCount;
 
-	@ManyToOne(fetch = FetchType.LAZY,
+	@ManyToOne(fetch = FetchType.EAGER,
 			targetEntity = AuthorModel.class,
 			cascade = {
 					CascadeType.MERGE,
@@ -54,8 +54,16 @@ public class DialogModel {
 			referencedColumnName = "id", name = "conversation_author", nullable = false, updatable = false)
 	private AuthorModel conversationAuthor;
 
-	@OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE}, optional = false)
-	@JoinColumn(name = "conversation_partner", nullable = false, updatable = false, columnDefinition = "LONG")
+	@ManyToOne(fetch = FetchType.EAGER,
+			targetEntity = AuthorModel.class,
+			cascade = {
+					CascadeType.MERGE,
+					CascadeType.REFRESH,
+					CascadeType.PERSIST},
+			optional = false)
+	@OnDelete(action = OnDeleteAction.NO_ACTION)
+	@JoinColumn(foreignKey = @ForeignKey(name = "d_p_fk"), columnDefinition = "Integer",
+			referencedColumnName = "id", name = "conversation_partner", nullable = false, updatable = false)
 	private AuthorModel conversationPartner;
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})

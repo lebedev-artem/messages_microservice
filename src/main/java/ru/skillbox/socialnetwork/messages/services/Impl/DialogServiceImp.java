@@ -24,6 +24,7 @@ import ru.skillbox.socialnetwork.messages.repository.MessageRepository;
 import ru.skillbox.socialnetwork.messages.services.DialogService;
 
 import javax.transaction.Transactional;
+import java.sql.Timestamp;
 import java.util.*;
 
 import static ru.skillbox.socialnetwork.messages.security.service.UserDetailsServiceImpl.getPrincipalId;
@@ -127,11 +128,22 @@ public class DialogServiceImp implements DialogService {
 //		Создаем диалог
 		dm = DialogModel.builder()
 				.isDeleted(false)
-				.unreadCount(dm.getLastMessage() != null ? 1 : 0)
+				.unreadCount(1)
 				.conversationAuthor(aum)
 				.conversationPartner(pam)
 				.lastMessage(new MessageModel())
 				.build();
+
+//		Создаем init message
+		MessageModel initM = MessageModel.builder()
+				.time(new Timestamp(System.currentTimeMillis()))
+				.dialogId(dm.getId())
+				.status(EMessageStatus.SENT)
+				.messageText("")
+				.author(aum)
+				.isDeleted(false)
+				.build();
+
 //		Создаем диалог для партнера
 //		revdm = dm;
 //		Меняем местами автора и партнера
@@ -146,8 +158,12 @@ public class DialogServiceImp implements DialogService {
 //		log.info(mm.toString());
 //		log.info(mtest.toString());
 //		end test mapping
-
+		dm.setLastMessage(initM);
 		dialogRepository.save(dm);
+		initM.setDialogId(dm.getId());
+		messageRepository.save(initM);
+
+
 //		dialogRepository.save(revdm);
 //		mm.setDialogId(dm.getId());
 
@@ -174,7 +190,7 @@ public class DialogServiceImp implements DialogService {
 			throw new DialogNotFoundException("Dialogs for Author id " + authorId + " not found");
 		}
 		log.info(" * Dialogs for Author {} contains {} elements", authorId, dialogsPage.get().getTotalElements());
-		return new ResponseEntity<>(dialogsPage.get(), HttpStatus.OK);
+		return new ResponseEntity<>(dialogsPage.get().getContent(), HttpStatus.OK);
 	}
 
 	/*
