@@ -20,11 +20,14 @@ public interface DialogRepository extends JpaRepository<DialogModel, UUID> {
 	Page<DialogModel> findAllByConversationAuthor(AuthorModel conversationAuthor, @NotNull Pageable pageable);
 	Page<DialogModel> findAllByConversationPartner(AuthorModel conversationPartner, @NotNull Pageable pageable);
 	Page<DialogModel> findAllByConversationAuthorOrConversationPartner(AuthorModel conversationAuthor, AuthorModel conversationPartner, @NotNull Pageable pageable);
+	List<DialogModel> findAllByConversationAuthorOrConversationPartner(AuthorModel conversationAuthor, AuthorModel conversationPartner);
 	List<DialogModel> findByConversationAuthor(AuthorModel conversationAuthor);
 	Boolean existsByConversationAuthorAndConversationPartner(AuthorModel conversationAuthor, AuthorModel conversationPartner);
 	DialogModel findByConversationAuthorAndConversationPartner(AuthorModel conversationAuthor, AuthorModel conversationPartner);
 	@Query(value = "SELECT SUM(d.unread_count) AS unread FROM dialogs d WHERE d.conversation_author = :id", nativeQuery = true)
 	Integer countUnreadCountByConversationAuthorId(Long id);
+	@Query(value = "SELECT SUM(d.unread_count) AS unread FROM dialogs d WHERE d.conversation_partner = :id", nativeQuery = true)
+	Integer countUnreadCountByConversationPartnerId(Long id);
 	@Modifying
 	@Query(value = "UPDATE dialogs d SET unread_count = 0 WHERE d.id = :dialogId", nativeQuery = true)
 	void setUnreadCountToZero(UUID dialogId);

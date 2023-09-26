@@ -190,23 +190,28 @@ public class DialogServiceImp implements DialogService {
 			throw new DialogNotFoundException("Dialogs for Author id " + authorId + " not found");
 		}
 		log.info(" * Dialogs for Author {} contains {} elements", authorId, dialogsPage.get().getTotalElements());
-		return new ResponseEntity<>(dialogsPage.get().getContent(), HttpStatus.OK);
+		return new ResponseEntity<>(dialogsPage.get(), HttpStatus.OK);
 	}
 
 	/*
 	Tested
+	FIX: count as author and as partner
     */
 	@Override
 	public Object getUnreadCount() {
 		UnreadCountDto ucd = new UnreadCountDto(0);
-		try {
-			ucd.setCount(dialogRepository.countUnreadCountByConversationAuthorId(getPrincipalId()));
-		} catch (RuntimeException e) {
-			log.error(" ! Dialog for user {} no found. {}", getPrincipalId(), e.getMessage());
+		AuthorModel aum = customMapper.getAuthorModelFromId(getPrincipalId());
+		int count;
+		Optional<List<DialogModel>> dmList = Optional.ofNullable(dialogRepository.findAllByConversationAuthorOrConversationPartner(aum, aum));
+		if (dmList.isPresent()) {
+			count = dmList.get().stream().mapToInt(DialogModel::getUnreadCount).sum();
+		} else {
+			log.error(" ! Dialog for user {} no found.", getPrincipalId());
 			return new ResponseEntity<>(
-					new ErrorResponse("Dialogs for user " + getPrincipalId() + " not found. " + e.getMessage(), HttpStatus.BAD_REQUEST),
+					new ErrorResponse("Dialogs for user " + getPrincipalId() + " not found. ", HttpStatus.BAD_REQUEST),
 					HttpStatus.BAD_REQUEST);
 		}
+		ucd.setCount(count);
 		return new ResponseEntity<>(ucd, HttpStatus.OK);
 	}
 
