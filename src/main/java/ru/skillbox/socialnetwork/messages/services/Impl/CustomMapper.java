@@ -40,18 +40,13 @@ public class CustomMapper {
 	@NotNull
 	public AuthorModel getAuthorModelFromId(Long id) {
 		AccountDto acDto = getAccountPrincipals(id);
-		Optional<AuthorModel> amO =
-				Optional.ofNullable(authorRepository.findById(id).
-						orElse(AuthorModel.builder()
+		return Optional.of(authorRepository.findById(id)
+						.orElse(AuthorModel.builder()
 								.id(acDto.getId())
 								.firstName(acDto.getFirstName())
 								.firstName(acDto.getLastName())
-								.firstName(acDto.getPhoto()).build()));
-		if (amO.isEmpty()) {
-			log.error(" ! User with id `{}` does not exist", id);
-			throw new UserPrincipalsNotFoundException("User with id " + id + " does not exist");
-		}
-		return amO.get();
+								.firstName(acDto.getPhoto())
+								.build())).get();
 	}
 
 	@Nullable

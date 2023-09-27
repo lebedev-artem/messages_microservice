@@ -19,6 +19,7 @@
                                  baseColumnNames="author"
                                  referencedTableName="author"
                                  referencedColumnNames="id"/>
+
 <!--        <addForeignKeyConstraint constraintName="fk_m_p"-->
 <!--                                 baseTableName="messages"-->
 <!--                                 baseColumnNames="partner"-->
