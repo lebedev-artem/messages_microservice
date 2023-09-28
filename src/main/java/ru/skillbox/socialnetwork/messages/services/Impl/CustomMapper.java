@@ -44,13 +44,13 @@ public class CustomMapper {
 						.orElse(AuthorModel.builder()
 								.id(acDto.getId())
 								.firstName(acDto.getFirstName())
-								.firstName(acDto.getLastName())
-								.firstName(acDto.getPhoto())
+								.lastName(acDto.getLastName())
+								.photo(acDto.getPhoto())
 								.build())).get();
 	}
 
 	@Nullable
-	private AuthorDto getAuthorDtoFromId(Long id) {
+	public AuthorDto getAuthorDtoFromId(Long id) {
 		Optional<AuthorModel> amO =
 				Optional.ofNullable(authorRepository.findById(id)
 						.orElseThrow(() -> new UserPrincipalsNotFoundException("User with id " + id + " does not exist")));
