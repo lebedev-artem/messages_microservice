@@ -89,16 +89,18 @@ public class DialogServiceImp implements DialogService {
 				.build();
 
 //		Создаем init message
-//		MessageModel initM = getInitMessage(diMo, auM);
-//		diMo.setLastMessage(initM);
-//		revDiMo.setLastMessage(initM);
+		MessageModel initM = getInitMessage(diMo, auM);
+		MessageModel revInitM = getInitMessage(revDiMo, paM);
+		diMo.setLastMessage(initM);
+		revDiMo.setLastMessage(revInitM);
 
 		diMo.setUnreadCount(diMo.getLastMessage() == null ? 0 : 1);
 		revDiMo.setUnreadCount(diMo.getLastMessage() == null ? 0 : 1);
 
 		dialogRepository.save(diMo);
 		dialogRepository.save(revDiMo);
-//		initM.setDialogId(diMo.getId());
+		initM.setDialogId(diMo.getId());
+		revInitM.setDialogId(revDiMo.getId());
 //		messageRepository.save(initM);
 
 		log.info(" * Dialogs {}, {} saved", diMo.getId(), revDiMo.getId());
@@ -116,6 +118,7 @@ public class DialogServiceImp implements DialogService {
 				.messageText("")
 				.author(authorModel)
 				.isDeleted(false)
+				.dialogId(dialogModel.getId())
 				.build();
 	}
 

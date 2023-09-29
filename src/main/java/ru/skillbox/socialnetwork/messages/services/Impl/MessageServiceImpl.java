@@ -99,17 +99,17 @@ public class MessageServiceImpl implements MessageService {
 	}
 
 	@Override
-	public Object getMessagesForDialog(Long partnerId, Pageable pageable) {
+	public Object getMessagesForDialog(Long companionId, Pageable pageable) {
 		Optional<DialogModel> dialogModel;
 		dialogModel = Optional.ofNullable(
 				dialogRepository.findByConversationAuthorAndConversationPartner(
 						customMapper.getAuthorModelFromId(userId),
-						customMapper.getAuthorModelFromId(partnerId)));
+						customMapper.getAuthorModelFromId(companionId)));
 
 		if (dialogModel.isEmpty()) {
 			dialogModel = Optional.ofNullable(
 					dialogRepository.findByConversationAuthorAndConversationPartner(
-							customMapper.getAuthorModelFromId(partnerId),
+							customMapper.getAuthorModelFromId(companionId),
 							customMapper.getAuthorModelFromId(userId)));
 		}
 
@@ -123,18 +123,18 @@ public class MessageServiceImpl implements MessageService {
 		} else {
 			DialogDto dialogDto = DialogDto.builder()
 					.conversationAuthor(AuthorDto.builder().id(userId).build())
-					.conversationPartner(AuthorDto.builder().id(partnerId).build())
+					.conversationPartner(AuthorDto.builder().id(companionId).build())
 					.build();
 
 			dialogService.createDialog(dialogDto);
 			Optional<DialogModel> dm;
 			dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(
-					customMapper.getAuthorModelFromId(partnerId),
+					customMapper.getAuthorModelFromId(companionId),
 					customMapper.getAuthorModelFromId(userId)));
 			if (dm.isEmpty()) {
 				dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(
 						customMapper.getAuthorModelFromId(userId),
-						customMapper.getAuthorModelFromId(partnerId)));
+						customMapper.getAuthorModelFromId(companionId)));
 			}
 
 			mmListP = messageRepository.findByDialogId(dm.get().getId(), Pageable.unpaged());
