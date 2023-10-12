@@ -2,6 +2,7 @@ package ru.skillbox.socialnetwork.messages.services.Impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,8 +23,10 @@ import ru.skillbox.socialnetwork.messages.services.MessageService;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @author Artem Lebedev | 18/09/2023 - 00:14
@@ -57,6 +60,8 @@ public class MessageServiceImpl implements MessageService {
 				.status(EMessageStatus.SENT)
 				.dialogId(mm.getDialogId())
 				.build();
+//		TODO
+//		дублировать сообщения
 		dialogService.setLastMessage(mm.getDialogId(), fmm);
 		messageRepository.save(fmm);
 		log.info(" * Message {} saved", fmm.getDialogId());
@@ -70,15 +75,7 @@ public class MessageServiceImpl implements MessageService {
 	@Transactional
 	public Object changeMessageStatus(Long partnerId) {
 		Optional<DialogModel> dm;
-		dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(
-				customMapper.getAuthorModelFromId(userId),
-				customMapper.getAuthorModelFromId(partnerId)));
-
-		if (dm.isEmpty()) {
-			dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(
-					customMapper.getAuthorModelFromId(partnerId),
-					customMapper.getAuthorModelFromId(userId)));
-		}
+		dm = chooseBetweenTwoDialogs(userId, partnerId);
 		if (dm.isEmpty()) {
 			throw new DialogNotFoundException("Dialog with income conditions not found");
 		}
@@ -100,6 +97,50 @@ public class MessageServiceImpl implements MessageService {
 
 	@Override
 	public Object getMessagesForDialog(Long companionId, Pageable pageable) {
+
+		Optional<DialogModel> dialogModel = chooseBetweenTwoDialogs(userId, companionId);
+
+		Page<MessageModel> unpagedMessages = null;
+		if (dialogModel.isPresent()) {
+			unpagedMessages = messageRepository.findByDialogId(dialogModel.get().getId(), Pageable.unpaged());
+		} else {
+			DialogDto dialogDto = DialogDto.builder()
+					.conversationAuthor(AuthorDto.builder().id(userId).build())
+					.conversationPartner(AuthorDto.builder().id(companionId).build())
+					.build();
+
+			dialogService.createDialog(dialogDto);
+			Optional<DialogModel> dm = chooseBetweenTwoDialogs(companionId, userId);
+			if (dm.isPresent()) {
+				unpagedMessages = messageRepository.findByDialogId(dm.get().getId(), Pageable.unpaged());
+			} else {
+				throw new DialogNotFoundException("Dialog with income conditions not found");
+			}
+		}
+		return unpagedMessages;
+	}
+
+	@Override
+	public List<MessageInlineDto> getMessagesListForDialog(UUID dialogId) {
+		Optional<List<MessageModel>> om = messageRepository.findByDialogId(dialogId);
+
+		List<MessageInlineDto> listOfMsg = new ArrayList<>();
+		if (om.isEmpty()) {
+			throw new DialogNotFoundException("Dialog with income conditions not found");
+		}
+		for (MessageModel mm : om.get()) {
+			MessageInlineDto m = MessageInlineDto.builder()
+					.text(mm.getMessageText())
+					.timestamp(mm.getTime())
+					.author(mm.getAuthor().getFirstName() + " " + mm.getAuthor().getLastName())
+					.build();
+			listOfMsg.add(m);
+		}
+		return listOfMsg;
+	}
+
+	@NotNull
+	private Optional<DialogModel> chooseBetweenTwoDialogs(Long userId, Long companionId) {
 		Optional<DialogModel> dialogModel;
 		dialogModel = Optional.ofNullable(
 				dialogRepository.findByConversationAuthorAndConversationPartner(
@@ -112,48 +153,7 @@ public class MessageServiceImpl implements MessageService {
 							customMapper.getAuthorModelFromId(companionId),
 							customMapper.getAuthorModelFromId(userId)));
 		}
-
-		Optional<List<MessageModel>> messageList;
-//		AuthorModel pam = customMapper.getAuthorModelFromId(partnerId);
-		Page<MessageModel> mmListP = null;
-		if (dialogModel.isPresent()) {
-//			messageList = messageRepository.findByDialogId(dialogModel.get().getId());
-//			messageList = messageRepository.findAllByConversationAuthorAndDialogId(pam, dialogModel.get().getId());
-			mmListP = messageRepository.findByDialogId(dialogModel.get().getId(), Pageable.unpaged());
-		} else {
-			DialogDto dialogDto = DialogDto.builder()
-					.conversationAuthor(AuthorDto.builder().id(userId).build())
-					.conversationPartner(AuthorDto.builder().id(companionId).build())
-					.build();
-
-			dialogService.createDialog(dialogDto);
-			Optional<DialogModel> dm;
-			dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(
-					customMapper.getAuthorModelFromId(companionId),
-					customMapper.getAuthorModelFromId(userId)));
-			if (dm.isEmpty()) {
-				dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(
-						customMapper.getAuthorModelFromId(userId),
-						customMapper.getAuthorModelFromId(companionId)));
-			}
-
-			mmListP = messageRepository.findByDialogId(dm.get().getId(), Pageable.unpaged());
-//			throw new DialogNotFoundException("Dialog satisfying to conditions not found");
-		}
-
-//		List<MessageShortTestDto> msdList = new ArrayList<>();
-
-//		for (MessageModel mm : messageList.get()) {
-//
-//			msdList.add(new MessageShortTestDto(
-//					mm.getId(),
-//					mm.getTime().toLocalDateTime(),
-//					mm.getAuthor().getId(),
-//					partnerId,
-//					mm.getMessageText()));
-//		}
-
-		return mmListP;
+		return dialogModel;
 	}
 
 	public void setUserId(Long userId) {

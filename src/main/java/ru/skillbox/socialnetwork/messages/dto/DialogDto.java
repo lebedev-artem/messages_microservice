@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 /**
  *     private Integer unreadCount<p>
  *     private AuthorDTO conversationPartner<p>
@@ -22,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DialogDto {
 
+    private UUID id;
     private Boolean isDeleted;
     private Integer unreadCount;
     private AuthorDto conversationAuthor;

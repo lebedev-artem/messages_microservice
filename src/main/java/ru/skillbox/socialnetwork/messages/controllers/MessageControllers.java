@@ -32,77 +32,89 @@ import java.util.UUID;
 @Tag(name = "Message service", description = "Сервис сообщений")
 public class MessageControllers {
 
-    private final DialogService dialogService;
-    private final MessageService messageService;
+	private final DialogService dialogService;
+	private final MessageService messageService;
 
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "400", description = "Bad request")})
-    @Operation(summary = "Обновление статуса сообщений")
-    @PutMapping(path = "/{userId}")
-    public Object changeMessageStatus(@PathVariable(value = "userId") Long partnerId) {
-        return messageService.changeMessageStatus(partnerId);
-    }
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Bad request")})
+	@Operation(summary = "Обновление статуса сообщений")
+	@PutMapping(path = "/{userId}")
+	public Object changeMessageStatus(@PathVariable(value = "userId") Long partnerId) {
+		return messageService.changeMessageStatus(partnerId);
+	}
 
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "400", description = "Bad request")})
-    @Operation(summary = "Создание сообщения, для тестирования")
-    @PostMapping(path = "/createMessage", produces = {"application/json"}, consumes = {"application/json"})
-    public Object createMessage
-            (@Valid
-             @Parameter(
-                     in = ParameterIn.DEFAULT,
-                     description = "",
-                     required = true,
-                     schema = @Schema())
-             @RequestBody MessageDto messageDto) {
-        log.info(" * GET \"/createMessage\"");
-        log.info(" * Payload: \n{}", messageDto);
-        return messageService.createMessage(messageDto);
-    }
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Bad request")})
+	@Operation(summary = "Создание сообщения, для тестирования")
+	@PostMapping(path = "/createMessage", produces = {"application/json"}, consumes = {"application/json"})
+	public Object createMessage
+			(@Valid
+			 @Parameter(
+					 in = ParameterIn.DEFAULT,
+					 description = "",
+					 required = true,
+					 schema = @Schema())
+			 @RequestBody MessageDto messageDto) {
+		log.info(" * GET \"/createMessage\"");
+		log.info(" * Payload: \n{}", messageDto);
+		return messageService.createMessage(messageDto);
+	}
 
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "400", description = "Bad request")})
-    @Operation(summary = "Создание диалога, для тестирования")
-    @PostMapping(path = "/createDialog", produces = {"application/json"}, consumes = {"application/json"})
-    public Object createDialog
-            (@Valid @Parameter(
-                    in = ParameterIn.DEFAULT,
-                    description = "",
-                    required = true,
-                    schema = @Schema())
-             @RequestBody DialogDto dialogDto) {
-        log.info(" * GET \"/createDialog\"");
-        log.info(" * Payload: \n{}", dialogDto);
-        return dialogService.createDialog(dialogDto);
-    }
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Bad request")})
+	@Operation(summary = "Создание диалога, для тестирования")
+	@PostMapping(path = "/createDialog", produces = {"application/json"}, consumes = {"application/json"})
+	public Object createDialog
+			(@Valid @Parameter(
+					in = ParameterIn.DEFAULT,
+					description = "",
+					required = true,
+					schema = @Schema())
+			 @RequestBody DialogDto dialogDto) {
+		log.info(" * GET \"/createDialog\"");
+		log.info(" * Payload: \n{}", dialogDto);
+		return dialogService.createDialog(dialogDto);
+	}
+	@PostMapping(path = "/createDialogForBot", produces = {"application/json"})
+	public Object createDialogForBot(@RequestParam Long authorId, @RequestParam Long partnerId) {
+		log.info(" * GET \"/createDialogForBot\"");
+		log.info(" * Payload: authorId - {}, partnerId - {}", authorId, partnerId);
+		return dialogService.createDialogForBot(authorId, partnerId);
+	}
 
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "400", description = "Bad request")})
-    @Operation(summary = "Получение списка диалогов")
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object getDialogs
-            (@RequestParam(required = false, defaultValue = "0") Integer page,
-             @RequestParam(required = false, defaultValue = "1") Integer size,
-             @RequestParam(required = false, defaultValue = "unreadCount") @Nullable String sort) {
-        log.info(" * GET \"/\"");
-        log.info(" * Payload: page?{}, size?{}, sort?{}", page, size, sort);
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort).descending());
-        return dialogService.getDialogsList(pageable);
-    }
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Bad request")})
+	@Operation(summary = "Получение списка диалогов")
+	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+	public Object getDialogs
+			(@RequestParam(required = false, defaultValue = "0") Integer page,
+			 @RequestParam(required = false, defaultValue = "1") Integer size,
+			 @RequestParam(required = false, defaultValue = "unreadCount") @Nullable String sort) {
+		log.info(" * GET \"/\"");
+		log.info(" * Payload: page?{}, size?{}, sort?{}", page, size, sort);
+		Pageable pageable = PageRequest.of(page, size, Sort.by(sort).descending());
+		return dialogService.getDialogsPage(pageable);
+	}
 
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "400", description = "Bad request")})
-    @Operation(summary = "Получение количества непрочитанных сообщений")
-    @GetMapping(value = "/unread", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object unread() {
-        log.info(" * GET \"/unread\"");
-        return dialogService.getUnreadCount();
-    }
+	@GetMapping(value = "/thisman/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Object getDialogsList(@PathVariable Long id) {
+		log.info(" * GET \"/thisman/{id}\"");
+		return dialogService.getDialogsList(id);
+	}
+
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Bad request")})
+	@Operation(summary = "Получение количества непрочитанных сообщений")
+	@GetMapping(value = "/unread", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Object unread() {
+		log.info(" * GET \"/unread\"");
+		return dialogService.getUnreadCount();
+	}
 //
 //    @ApiResponses(value = {
 //            @ApiResponse(responseCode = "200", description = "Successful operation"),
@@ -115,21 +127,31 @@ public class MessageControllers {
 //        return dialogService.getDialogOrCreate(id, conversationPartner1, conversationPartner2);
 //    }
 
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "400", description = "Bad request")})
-    @Operation(summary = "Получение сообщений сообщений диалога")
-    @GetMapping(value = "/messages")
-    public Object messages(@RequestParam(name = "companionId") Long companionId,
-                           @RequestParam(defaultValue = "0") Integer page,
-                           @RequestParam(defaultValue = "1") Integer size) {
-        log.info(" * GET \"/messages\"");
-        log.info(" * Payload: companionId={}, offset={}, limit={}", companionId, page, size);
-        Pageable pageable = PageRequest.of(page, size, Sort.by("time").ascending());
-        return messageService.getMessagesForDialog(companionId, pageable);
-    }
-    @DeleteMapping(value = "/delDialogById")
-    public void delDialog(@RequestParam UUID dialogId) {
-        dialogService.delDialog(dialogId);
-    }
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Bad request")})
+	@Operation(summary = "Получение сообщений сообщений диалога")
+	@GetMapping(value = "/messages")
+	public Object messages(@RequestParam(name = "companionId") Long companionId,
+	                       @RequestParam(defaultValue = "0") Integer page,
+	                       @RequestParam(defaultValue = "1") Integer size) {
+		log.info(" * GET \"/messages\"");
+		log.info(" * Payload: companionId={}, offset={}, limit={}", companionId, page, size);
+		Pageable pageable = PageRequest.of(page, size, Sort.by("time").ascending());
+		return messageService.getMessagesForDialog(companionId, pageable);
+	}
+
+
+	@GetMapping(value = "/messages/thisdialog/{dialogId}")
+	public Object messages(@PathVariable(name = "dialogId") UUID dialogId) {
+		log.info(" * GET \"/messages/thisdialog/{dialogId}\"");
+		return messageService.getMessagesListForDialog(dialogId);
+	}
+
+
+
+	@DeleteMapping(value = "/delDialogById")
+	public void delDialog(@RequestParam UUID dialogId) {
+		dialogService.delDialog(dialogId);
+	}
 }

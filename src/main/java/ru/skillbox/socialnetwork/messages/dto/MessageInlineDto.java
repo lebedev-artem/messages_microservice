@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,21 +17,17 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MessageShortTestDto {
-
-	UUID id;
+public class MessageInlineDto {
 
 	//Дата и время отправки
-	LocalDateTime time;
-
-	//UUID первого собеседника
+	private Timestamp timestamp;
 	@NonNull
-	Long conversationPartner1;
-
-	//UUID второго собеседника
+	private String author;
 	@NonNull
-	Long conversationPartner2;
+	private String text;
 
-	//Текст сообщения
-	String messageText;
+	@Override
+	public String toString() {
+		return  timestamp +	author + text + "\n";
+	}
 }
