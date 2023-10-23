@@ -116,7 +116,7 @@ public class DialogServiceImp implements DialogService {
 
 	@Override
 	@Transactional
-	public Object createDialogForBot(@NotNull Long authorId, Long partnerId) {
+	public Object createDialogWithThisMan(@NotNull Long authorId, Long partnerId) {
 
 //		NON NULL checking
 		if (authorId == null | partnerId == null) {
@@ -193,7 +193,7 @@ public class DialogServiceImp implements DialogService {
 	public Object getDialogsPage(Pageable pageable) {
 		Long authorId = getPrincipalId();
 		AuthorModel aum = customMapper.getAuthorModelFromId(authorId);
-		Optional<Page<DialogModel>> dialogsPage = Optional.of(dialogRepository.findAllByConversationAuthor(aum, Pageable.unpaged()));
+		Optional<Page<DialogModel>> dialogsPage = Optional.of(dialogRepository.findByConversationAuthor(aum, Pageable.unpaged()));
 		log.info(" * Dialogs for Author {} contains {} elements", authorId, dialogsPage.get().getTotalElements());
 		return new ResponseEntity<>(dialogsPage.get(), HttpStatus.OK);
 	}
@@ -207,7 +207,7 @@ public class DialogServiceImp implements DialogService {
 		UnreadCountDto ucd = new UnreadCountDto(0);
 		AuthorModel aum = customMapper.getAuthorModelFromId(getPrincipalId());
 		int count;
-		Optional<List<DialogModel>> dmList = Optional.ofNullable(dialogRepository.findAllByConversationAuthor(aum));
+		Optional<List<DialogModel>> dmList = Optional.ofNullable(dialogRepository.findByConversationAuthor(aum));
 		if (dmList.isPresent()) {
 			count = dmList.get().stream().mapToInt(DialogModel::getUnreadCount).sum();
 		} else {
@@ -227,22 +227,37 @@ public class DialogServiceImp implements DialogService {
 		Optional<DialogModel> dm = dialogRepository.findById(dialogId);
 		if (dm.isPresent()) {
 			dm.get().setLastMessage(messageModel);
-			dm.get().setUnreadCount(dm.get().getUnreadCount() + 1);
+			if (!dm.get().getConversationAuthor().getId().equals(messageModel.getAuthor().getId())) {
+				dm.get().setUnreadCount(dm.get().getUnreadCount() + 1);
+			}
 		} else throw new DialogNotFoundException("Dialog " + dialogId + " not found");
 	}
 
 	@Override
 	@Transactional
-	public void delDialog(UUID dialogId) {
-		dialogRepository.deleteById(dialogId);
+	public Object delDialog(Long id) {
+		AuthorModel aum = customMapper.getAuthorModelFromId(getPrincipalId());
+		AuthorModel pam = customMapper.getAuthorModelFromId(id);
+		Optional<DialogModel> dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(aum, pam));
+		Optional<DialogModel> dmrev = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(pam, aum));
+		if (dm.isPresent() & dmrev.isPresent())  {
+			dialogRepository.delete(dm.get());
+			dialogRepository.delete(dmrev.get());
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+		return ResponseEntity.badRequest();
 	}
 
 //	coded spec for BOT
 	@Override
 	public List<DialogDto> getDialogsList(Long id) {
-		List<DialogModel> dmList = dialogRepository.findAllByConversationAuthor(customMapper.getAuthorModelFromId(id));
+		List<DialogModel> dmList = dialogRepository.findByConversationAuthor(customMapper.getAuthorModelFromId(id));
 		return dmList.stream().map(dm -> objectMapper.convertValue(dm, DialogDto.class)).collect(Collectors.toList());
 	}
 
+	@Override
+	public Integer getMessageCountForDialog(UUID dialogId) {
+		return messageRepository.countByDialogId(dialogId);
+	}
 
 }

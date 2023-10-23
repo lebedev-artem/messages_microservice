@@ -1,4 +1,4 @@
-package ru.skillbox.socialnetwork.messages.dto;
+package ru.skillbox.socialnetwork.messages.dto.telegram;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,10 +19,11 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageInlineDto {
 
-	//Дата и время отправки
 	private Timestamp timestamp;
 	@NonNull
 	private String author;
+	@NonNull
+	private Long authorId;
 	@NonNull
 	private String text;
 

@@ -1,4 +1,4 @@
-package ru.skillbox.socialnetwork.messages.client;
+package ru.skillbox.socialnetwork.messages.config;
 
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;

@@ -5,12 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.skillbox.socialnetwork.messages.dto.*;
+import ru.skillbox.socialnetwork.messages.dto.telegram.MessageInlineDto;
+import ru.skillbox.socialnetwork.messages.dto.telegram.MessageTgDto;
 import ru.skillbox.socialnetwork.messages.exception.exceptions.DialogNotFoundException;
 import ru.skillbox.socialnetwork.messages.models.AuthorModel;
 import ru.skillbox.socialnetwork.messages.models.DialogModel;
@@ -68,6 +69,51 @@ public class MessageServiceImpl implements MessageService {
 		return new ResponseEntity<>(modelMapper.map(fmm, MessageDto.class), HttpStatus.OK);
 	}
 
+	@Override
+	@Transactional
+	public Object saveMessage(MessageTgDto msg) {
+
+//		MessageModel mm = modelMapper.map(messageDto, MessageModel.class);
+
+		/*
+		Artem Lebedev написал в диалог с Tema Lebedev: first message
+		Artem Lebedev автор сообзения в двух диалогах
+		 */
+		AuthorModel aum = customMapper.getAuthorModelFromId(msg.getAuthor());
+		AuthorModel pam = customMapper.getAuthorModelFromId(msg.getPartner());
+
+		DialogModel dm = dialogRepository.findByConversationAuthorAndConversationPartner(aum, pam);
+		DialogModel revdm = dialogRepository.findByConversationAuthorAndConversationPartner(pam, aum);
+
+
+		MessageModel mm = MessageModel.builder()
+				.isDeleted(false)
+				.time(msg.getTime() == null ? new Timestamp(System.currentTimeMillis()) : msg.getTime())
+				.author(aum)
+				.messageText(msg.getMessageText())
+				.status(EMessageStatus.SENT)
+				.dialogId(dm.getId())
+				.build();
+
+
+		MessageModel revmm = MessageModel.builder()
+				.isDeleted(false)
+				.time(msg.getTime() == null ? new Timestamp(System.currentTimeMillis()) : msg.getTime())
+				.author(aum)
+				.messageText(msg.getMessageText())
+				.status(EMessageStatus.SENT)
+				.dialogId(revdm.getId())
+				.build();
+
+		dialogService.setLastMessage(mm.getDialogId(), mm);
+		dialogService.setLastMessage(revmm.getDialogId(), revmm);
+
+		messageRepository.save(mm);
+		messageRepository.save(revmm);
+		log.info(" * Message {} and {} saved", mm.getId(), revmm.getId());
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
 	/*
 	Tested
 	 */
@@ -121,6 +167,7 @@ public class MessageServiceImpl implements MessageService {
 	}
 
 	@Override
+	@Transactional
 	public List<MessageInlineDto> getMessagesListForDialog(UUID dialogId) {
 		Optional<List<MessageModel>> om = messageRepository.findByDialogId(dialogId);
 
@@ -133,8 +180,48 @@ public class MessageServiceImpl implements MessageService {
 					.text(mm.getMessageText())
 					.timestamp(mm.getTime())
 					.author(mm.getAuthor().getFirstName() + " " + mm.getAuthor().getLastName())
+					.authorId(mm.getAuthor().getId())
 					.build();
 			listOfMsg.add(m);
+			mm.setStatus(EMessageStatus.READ);
+			messageRepository.save(mm);
+			dialogRepository.setUnreadCountToZero(mm.getDialogId());
+		}
+
+		return listOfMsg;
+	}
+
+	@Override
+	@Transactional
+	public List<MessageInlineDto> getUnreadMessagesListForThisMan(Long userId) {
+		List<MessageInlineDto> listOfMsg = new ArrayList<>();
+
+		Optional<List<DialogModel>> dialogsForThisMan = Optional.ofNullable(dialogRepository.findByConversationAuthorAndUnreadCountNot(customMapper.getAuthorModelFromId(userId), 0));
+		if (dialogsForThisMan.isEmpty()) {
+			return listOfMsg;
+		}
+
+		for (DialogModel dm : dialogsForThisMan.get()){
+			if (dm.getUnreadCount() == 0) {
+				break;
+			}
+			Optional<List<MessageModel>> modelList = messageRepository.findByDialogIdAndStatusAndAuthor_Id(dm.getId(), EMessageStatus.SENT, dm.getConversationPartner().getId());
+			if (modelList.isPresent()) {
+
+				for (MessageModel mm : modelList.get()) {
+
+					MessageInlineDto m = MessageInlineDto.builder()
+							.text(mm.getMessageText())
+							.timestamp(mm.getTime())
+							.author(mm.getAuthor().getFirstName() + " " + mm.getAuthor().getLastName())
+							.authorId(mm.getAuthor().getId())
+							.build();
+					listOfMsg.add(m);
+					mm.setStatus(EMessageStatus.READ);
+					messageRepository.save(mm);
+					dialogRepository.setUnreadCountToZero(mm.getDialogId());
+				}
+			}
 		}
 		return listOfMsg;
 	}

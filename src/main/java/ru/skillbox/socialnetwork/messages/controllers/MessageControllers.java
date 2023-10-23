@@ -7,9 +7,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.context.annotation.Role;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import ru.skillbox.socialnetwork.messages.dto.*;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -18,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import ru.skillbox.socialnetwork.messages.dto.telegram.MessageTgDto;
 import ru.skillbox.socialnetwork.messages.services.DialogService;
 import ru.skillbox.socialnetwork.messages.services.MessageService;
 
@@ -78,12 +81,6 @@ public class MessageControllers {
 		log.info(" * Payload: \n{}", dialogDto);
 		return dialogService.createDialog(dialogDto);
 	}
-	@PostMapping(path = "/createDialogForBot", produces = {"application/json"})
-	public Object createDialogForBot(@RequestParam Long authorId, @RequestParam Long partnerId) {
-		log.info(" * GET \"/createDialogForBot\"");
-		log.info(" * Payload: authorId - {}, partnerId - {}", authorId, partnerId);
-		return dialogService.createDialogForBot(authorId, partnerId);
-	}
 
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Successful operation"),
@@ -100,12 +97,6 @@ public class MessageControllers {
 		return dialogService.getDialogsPage(pageable);
 	}
 
-	@GetMapping(value = "/thisman/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Object getDialogsList(@PathVariable Long id) {
-		log.info(" * GET \"/thisman/{id}\"");
-		return dialogService.getDialogsList(id);
-	}
-
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Bad request")})
@@ -115,17 +106,6 @@ public class MessageControllers {
 		log.info(" * GET \"/unread\"");
 		return dialogService.getUnreadCount();
 	}
-//
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Successful operation"),
-//            @ApiResponse(responseCode = "400", description = "Bad request")})
-//    @Operation(summary = "Получение(создание) диалога между пользователями")
-//    @GetMapping(value = "/recipientId/", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Object recipientId(@RequestParam(required = false) UUID id,
-//                                 @RequestParam(name = "conversationPartner1", required = false) Long conversationPartner1,
-//                                 @RequestParam(name = "conversationPartner2", required = false) Long conversationPartner2) {
-//        return dialogService.getDialogOrCreate(id, conversationPartner1, conversationPartner2);
-//    }
 
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Successful operation"),
@@ -133,25 +113,60 @@ public class MessageControllers {
 	@Operation(summary = "Получение сообщений сообщений диалога")
 	@GetMapping(value = "/messages")
 	public Object messages(@RequestParam(name = "companionId") Long companionId,
-	                       @RequestParam(defaultValue = "0") Integer page,
-	                       @RequestParam(defaultValue = "1") Integer size) {
+	                          @RequestParam(defaultValue = "0") Integer page,
+	                          @RequestParam(defaultValue = "1") Integer size) {
 		log.info(" * GET \"/messages\"");
 		log.info(" * Payload: companionId={}, offset={}, limit={}", companionId, page, size);
 		Pageable pageable = PageRequest.of(page, size, Sort.by("time").ascending());
 		return messageService.getMessagesForDialog(companionId, pageable);
 	}
 
-
+	//  BOT
 	@GetMapping(value = "/messages/thisdialog/{dialogId}")
-	public Object messages(@PathVariable(name = "dialogId") UUID dialogId) {
+	public Object getMessages(@PathVariable(name = "dialogId") UUID dialogId) {
 		log.info(" * GET \"/messages/thisdialog/{dialogId}\"");
 		return messageService.getMessagesListForDialog(dialogId);
 	}
 
+	//	BOT
+	@GetMapping(value = "/messages/unread/thisman/{userId}")
+	public Object getUnreadMessages(@PathVariable(name = "userId") Long userId) {
+		log.info(" * GET \"/messages/unread/thisman/{userId}\"");
+		return messageService.getUnreadMessagesListForThisMan(userId);
+	}
 
+	//	BOT
+	@PostMapping(path = "/saveMessage", produces = {"application/json"})
+	public Object saveMessage(@RequestBody MessageTgDto messageDto) {
+		log.info(" * GET \"/saveMessage\"");
+		log.info(" * Payload: \n{}", messageDto);
+		return messageService.saveMessage(messageDto);
+	}
 
-	@DeleteMapping(value = "/delDialogById")
-	public void delDialog(@RequestParam UUID dialogId) {
-		dialogService.delDialog(dialogId);
+	//	BOT
+	@PostMapping(path = "/createDialogWithThisMan", produces = {"application/json"})
+	public Object createDialogWithThisMan(@RequestParam Long authorId, @RequestParam Long partnerId) {
+		log.info(" * GET \"/createDialogFWithThisMan\"");
+		log.info(" * Payload: authorId - {}, partnerId - {}", authorId, partnerId);
+		return dialogService.createDialogWithThisMan(authorId, partnerId);
+	}
+
+	//	BOT
+	@GetMapping(value = "/thisman/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Object getDialogsList(@PathVariable Long id) {
+		log.info(" * GET \"/thisman/{id}\"");
+		return dialogService.getDialogsList(id);
+	}
+
+	@GetMapping(value = "/thisdialog/{dialogId}/count", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Object getMessageCountForDialog(@PathVariable UUID dialogId) {
+		log.info(" * GET \"/thisdialog/{dialogId}/count\"");
+		return dialogService.getMessageCountForDialog(dialogId);
+	}
+
+	@PreAuthorize("hasRole('ADMIN')")
+	@DeleteMapping(value = "/deleteDialogWithThisMan/{id}")
+	public Object delDialog(@PathVariable Long id) {
+		return 	dialogService.delDialog(id);
 	}
 }

@@ -13,4 +13,5 @@
     <include file="create-changeset-author.xml" relativeToChangelogFile="true"/>
     <include file="create-changeset-messages-messages-author.xml" relativeToChangelogFile="true"/>
     <include file="create-changeset-messages-dialogs-constraint.xml" relativeToChangelogFile="true"/>
+    <include file="create-changeset-messages-change-status-to-long.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
