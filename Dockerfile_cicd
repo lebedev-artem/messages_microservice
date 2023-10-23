@@ -1,5 +1,5 @@
 FROM adoptopenjdk/openjdk11:alpine-jre
-ARG JAR_FILE=target/messages-1.0-SNAPSHOT.jar
+ARG JAR_FILE=target/messages-0.1.0-SNAPSHOT.jar
 WORKDIR /opt/buildagent/work
 COPY ${JAR_FILE} messages.jar
 EXPOSE 8091
