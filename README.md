@@ -1,6 +1,8 @@
 # Messages_microservice
 
-
+```bash
+docker stop messages && docker rm messages && docker image rm messages && docker build -t messages . && docker run -d -p 8091:8091 --name messages messages
+```
 
 ## Getting started
 

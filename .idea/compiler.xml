@@ -7,12 +7,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="message_microservice" />
+        <module name="messages" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="message_microservice" target="11" />
       <module name="Message_microservice" target="11" />
-      <module name="messages" target="11" />
       <module name="messages_microservice" target="11" />
     </bytecodeTargetLevel>
   </component>
@@ -20,6 +20,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="Message_microservice" options="-parameters" />
       <module name="message_microservice" options="-parameters" />
+      <module name="messages" options="-parameters" />
     </option>
   </component>
 </project>

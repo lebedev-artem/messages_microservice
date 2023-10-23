@@ -24,6 +24,7 @@ import ru.skillbox.socialnetwork.messages.services.DialogService;
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.skillbox.socialnetwork.messages.security.service.UserDetailsServiceImpl.getPrincipalId;
 
@@ -71,7 +72,7 @@ public class DialogServiceImp implements DialogService {
 					new ErrorResponse("Dialog with income conditions already exists", HttpStatus.BAD_REQUEST),
 					HttpStatus.BAD_REQUEST);
 		}
-
+//      create dialogs
 		DialogModel diMo;
 		DialogModel revDiMo;
 //		Создаем диалог
@@ -89,20 +90,83 @@ public class DialogServiceImp implements DialogService {
 				.build();
 
 //		Создаем init message
-		MessageModel initM = getInitMessage(diMo, auM);
-		MessageModel revInitM = getInitMessage(revDiMo, paM);
-		diMo.setLastMessage(initM);
-		revDiMo.setLastMessage(revInitM);
+//		MessageModel initM = getInitMessage(diMo, auM);
+//		MessageModel revInitM = getInitMessage(revDiMo, paM);
+
+//		устанавливаем в диалоги последнее сообщение
+//		diMo.setLastMessage(initM);
+//		revDiMo.setLastMessage(revInitM);
 
 		diMo.setUnreadCount(diMo.getLastMessage() == null ? 0 : 1);
 		revDiMo.setUnreadCount(diMo.getLastMessage() == null ? 0 : 1);
 
 		dialogRepository.save(diMo);
 		dialogRepository.save(revDiMo);
-		initM.setDialogId(diMo.getId());
-		revInitM.setDialogId(revDiMo.getId());
+
+//		initM.setDialogId(diMo.getId());
+//		revInitM.setDialogId(revDiMo.getId());
 //		messageRepository.save(initM);
 
+		log.info(" * Dialogs {}, {} saved", diMo.getId(), revDiMo.getId());
+
+//		mapping Model to DTO for output
+		DialogDto dDto = objectMapper.convertValue(diMo, DialogDto.class);
+		return new ResponseEntity<>(dDto, HttpStatus.OK);
+	}
+
+	@Override
+	@Transactional
+	public Object createDialogWithThisMan(@NotNull Long authorId, Long partnerId) {
+
+//		NON NULL checking
+		if (authorId == null | partnerId == null) {
+			log.error(" ! Author or partner id is NULL");
+			return new ResponseEntity<>(
+					new ErrorResponse("Wrong data for author / partner", HttpStatus.BAD_REQUEST),
+					HttpStatus.BAD_REQUEST);
+		}
+
+		AccountDto auPrncpl =
+				customMapper.getAccountPrincipals(
+						authorId);
+		AccountDto paPrncpl =
+				customMapper.getAccountPrincipals(
+						partnerId);
+
+//      Ищем в базе author автора и партнера, если не находим, создаем новых
+		AuthorModel auM = customMapper.getAuthorModelFromId(auPrncpl.getId());
+		AuthorModel paM = customMapper.getAuthorModelFromId(paPrncpl.getId());
+
+//		Trying to get dialog
+		if (dialogRepository.existsByConversationAuthorAndConversationPartner(auM, paM) |
+				dialogRepository.existsByConversationAuthorAndConversationPartner(paM, auM)) {
+			log.error(" ! Dialog with income conditions already exists");
+			return new ResponseEntity<>(
+					new ErrorResponse("Dialog with income conditions already exists", HttpStatus.BAD_REQUEST),
+					HttpStatus.BAD_REQUEST);
+		}
+//      create dialogs
+		DialogModel diMo;
+		DialogModel revDiMo;
+//		Создаем диалог
+		diMo = DialogModel.builder()
+				.isDeleted(false)
+				.conversationAuthor(auM)
+				.conversationPartner(paM)
+//				.lastMessage(new MessageModel())
+				.build();
+		revDiMo = DialogModel.builder()
+				.isDeleted(false)
+				.conversationAuthor(paM)
+				.conversationPartner(auM)
+//				.lastMessage(new MessageModel())
+				.build();
+
+		diMo.setUnreadCount(diMo.getLastMessage() == null ? 0 : 1);
+		revDiMo.setUnreadCount(diMo.getLastMessage() == null ? 0 : 1);
+
+		dialogRepository.save(diMo);
+		dialogRepository.save(revDiMo);
 		log.info(" * Dialogs {}, {} saved", diMo.getId(), revDiMo.getId());
 
 //		mapping Model to DTO for output
@@ -126,10 +190,10 @@ public class DialogServiceImp implements DialogService {
 	Tested locally
 	 */
 	@Override
-	public Object getDialogsList(Pageable pageable) {
+	public Object getDialogsPage(Pageable pageable) {
 		Long authorId = getPrincipalId();
 		AuthorModel aum = customMapper.getAuthorModelFromId(authorId);
-		Optional<Page<DialogModel>> dialogsPage = Optional.of(dialogRepository.findAllByConversationAuthor(aum, Pageable.unpaged()));
+		Optional<Page<DialogModel>> dialogsPage = Optional.of(dialogRepository.findByConversationAuthor(aum, Pageable.unpaged()));
 		log.info(" * Dialogs for Author {} contains {} elements", authorId, dialogsPage.get().getTotalElements());
 		return new ResponseEntity<>(dialogsPage.get(), HttpStatus.OK);
 	}
@@ -156,31 +220,6 @@ public class DialogServiceImp implements DialogService {
 		return new ResponseEntity<>(ucd, HttpStatus.OK);
 	}
 
-	/*
-	Postman tested
-	need refactor
-	 */
-//	@Override
-//	public Object getDialogOrCreate(UUID dialogId, Long conversationPartner1, Long conversationPartner2) {
-//		if (dialogId == null) {
-//			return createDialog(conversationPartner1, conversationPartner2);
-//		}
-//		Optional<DialogModel> dialogModel = dialogRepository.findById(dialogId);
-//		return objectMapper.convertValue(dialogModel.orElseThrow(), DialogDto.class);
-//	}
-//
-//	private DialogDto createDialog(Long conversationAuthor, Long conversationPartner) {
-//		DialogModel dialogModel = DialogModel.builder()
-//				.isDeleted(false)
-//				.conversationAuthor(customMapper.getAuthorModelFromId(conversationAuthor))
-//				.conversationPartner(customMapper.getAuthorModelFromId(conversationPartner))
-//				.unreadCount(0)
-//				.lastMessage(new MessageModel())
-//				.build();
-//		dialogRepository.save(dialogModel);
-//		return objectMapper.convertValue(dialogModel, DialogDto.class);
-//	}
-
 
 	@Override
 	@Transactional
@@ -188,13 +227,37 @@ public class DialogServiceImp implements DialogService {
 		Optional<DialogModel> dm = dialogRepository.findById(dialogId);
 		if (dm.isPresent()) {
 			dm.get().setLastMessage(messageModel);
-			dm.get().setUnreadCount(dm.get().getUnreadCount() + 1);
+			if (!dm.get().getConversationAuthor().getId().equals(messageModel.getAuthor().getId())) {
+				dm.get().setUnreadCount(dm.get().getUnreadCount() + 1);
+			}
 		} else throw new DialogNotFoundException("Dialog " + dialogId + " not found");
 	}
 
 	@Override
 	@Transactional
-	public void delDialog(UUID dialogId) {
-		dialogRepository.deleteById(dialogId);
+	public Object delDialog(Long id) {
+		AuthorModel aum = customMapper.getAuthorModelFromId(getPrincipalId());
+		AuthorModel pam = customMapper.getAuthorModelFromId(id);
+		Optional<DialogModel> dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(aum, pam));
+		Optional<DialogModel> dmrev = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(pam, aum));
+		if (dm.isPresent() & dmrev.isPresent())  {
+			dialogRepository.delete(dm.get());
+			dialogRepository.delete(dmrev.get());
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+		return ResponseEntity.badRequest();
 	}
+
+//	coded spec for BOT
+	@Override
+	public List<DialogDto> getDialogsList(Long id) {
+		List<DialogModel> dmList = dialogRepository.findByConversationAuthor(customMapper.getAuthorModelFromId(id));
+		return dmList.stream().map(dm -> objectMapper.convertValue(dm, DialogDto.class)).collect(Collectors.toList());
+	}
+
+	@Override
+	public Integer getMessageCountForDialog(UUID dialogId) {
+		return messageRepository.countByDialogId(dialogId);
+	}
+
 }

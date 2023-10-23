@@ -15,7 +15,6 @@ public class MessagesMicroServiceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(MessagesMicroServiceApplication.class, args);
 	}
-
 	@Bean
 	public ModelMapper modelMapper() {
 		return new ModelMapper();

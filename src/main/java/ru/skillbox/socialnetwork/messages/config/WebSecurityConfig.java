@@ -1,4 +1,4 @@
-package ru.skillbox.socialnetwork.messages.security.config;
+package ru.skillbox.socialnetwork.messages.config;
 
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -75,7 +75,14 @@ public class WebSecurityConfig {
 				.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests()
-				.antMatchers("/api/v1/dialogs/swagger-ui/**", "/api/v1/dialogs/h2-console/**", "/api/v1/dialogs/actuator/**").permitAll()
+				.antMatchers(
+						"/api/v1/dialogs/swagger-ui/**",
+						"/api/v1/dialogs/h2-console/**",
+						"/api/v1/dialogs/actuator/**",
+						"/actuator/**",
+						"/actuator/prometheus",
+						"/actuator/prometheus/**").permitAll()
+				.antMatchers("/api/v1/dialogs/deleteDialogWithThisMan/{id}").hasRole("ADMIN")
 				.anyRequest().authenticated();
 		http.authenticationProvider(authenticationProvider());
 		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

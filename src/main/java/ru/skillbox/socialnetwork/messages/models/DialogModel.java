@@ -33,7 +33,7 @@ public class DialogModel {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@GenericGenerator(name = "uuid2", strategy = "uuid2")
 	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "uuid2")
-	@JsonIgnore
+//	@JsonIgnore
 	private UUID id;
 
 	@Column(name = "is_deleted", nullable = false)
