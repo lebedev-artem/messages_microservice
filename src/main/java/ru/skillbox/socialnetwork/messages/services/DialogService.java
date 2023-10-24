@@ -18,10 +18,12 @@ public interface DialogService {
     Object getUnreadCount();
 //    Object getDialogOrCreate(UUID id, Long conversationPartner1, Long conversationPartner2);
     void  setLastMessage(UUID dialogId, MessageModel message);
-    Object delDialog(Long id);
+    Object delDialogWithThisMan(Long id);
 
 //    for bot
     List<DialogDto> getDialogsList(Long id);
-    Integer getMessageCountForDialog(UUID dialogId);
+    Integer getMessagesCountForDialog(UUID dialogId);
+
+    void deleteThisDialog(UUID dialogId);
 
 }

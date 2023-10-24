@@ -32,6 +32,7 @@ public interface DialogRepository extends JpaRepository<DialogModel, UUID> {
 	@Query(value = "UPDATE dialogs d SET unread_count = 0 WHERE d.id = :dialogId", nativeQuery = true)
 	void setUnreadCountToZero(UUID dialogId);
 
+	void deleteByConversationAuthorAndConversationPartner(AuthorModel aum, AuthorModel pam);
 //	for bot
 
 

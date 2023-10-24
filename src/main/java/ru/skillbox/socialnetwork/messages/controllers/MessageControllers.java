@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.context.annotation.Role;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -60,8 +59,8 @@ public class MessageControllers {
 					 required = true,
 					 schema = @Schema())
 			 @RequestBody MessageDto messageDto) {
-		log.info(" * GET \"/createMessage\"");
-		log.info(" * Payload: \n{}", messageDto);
+		log.debug(" * GET \"/createMessage\"");
+		log.debug(" * Payload: \n{}", messageDto);
 		return messageService.createMessage(messageDto);
 	}
 
@@ -77,8 +76,8 @@ public class MessageControllers {
 					required = true,
 					schema = @Schema())
 			 @RequestBody DialogDto dialogDto) {
-		log.info(" * GET \"/createDialog\"");
-		log.info(" * Payload: \n{}", dialogDto);
+		log.debug(" * GET \"/createDialog\"");
+		log.debug(" * Payload: \n{}", dialogDto);
 		return dialogService.createDialog(dialogDto);
 	}
 
@@ -91,8 +90,8 @@ public class MessageControllers {
 			(@RequestParam(required = false, defaultValue = "0") Integer page,
 			 @RequestParam(required = false, defaultValue = "1") Integer size,
 			 @RequestParam(required = false, defaultValue = "unreadCount") @Nullable String sort) {
-		log.info(" * GET \"/\"");
-		log.info(" * Payload: page?{}, size?{}, sort?{}", page, size, sort);
+		log.debug(" * GET \"/\"");
+		log.debug(" * Payload: page?{}, size?{}, sort?{}", page, size, sort);
 		Pageable pageable = PageRequest.of(page, size, Sort.by(sort).descending());
 		return dialogService.getDialogsPage(pageable);
 	}
@@ -103,7 +102,7 @@ public class MessageControllers {
 	@Operation(summary = "Получение количества непрочитанных сообщений")
 	@GetMapping(value = "/unread", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Object unread() {
-		log.info(" * GET \"/unread\"");
+		log.debug(" * GET \"/unread\"");
 		return dialogService.getUnreadCount();
 	}
 
@@ -115,8 +114,8 @@ public class MessageControllers {
 	public Object messages(@RequestParam(name = "companionId") Long companionId,
 	                          @RequestParam(defaultValue = "0") Integer page,
 	                          @RequestParam(defaultValue = "1") Integer size) {
-		log.info(" * GET \"/messages\"");
-		log.info(" * Payload: companionId={}, offset={}, limit={}", companionId, page, size);
+		log.debug(" * GET \"/messages\"");
+		log.debug(" * Payload: companionId={}, offset={}, limit={}", companionId, page, size);
 		Pageable pageable = PageRequest.of(page, size, Sort.by("time").ascending());
 		return messageService.getMessagesForDialog(companionId, pageable);
 	}
@@ -124,49 +123,57 @@ public class MessageControllers {
 	//  BOT
 	@GetMapping(value = "/messages/thisdialog/{dialogId}")
 	public Object getMessages(@PathVariable(name = "dialogId") UUID dialogId) {
-		log.info(" * GET \"/messages/thisdialog/{dialogId}\"");
+		log.debug(" * GET \"/messages/thisdialog/{dialogId}\"");
 		return messageService.getMessagesListForDialog(dialogId);
 	}
 
 	//	BOT
 	@GetMapping(value = "/messages/unread/thisman/{userId}")
 	public Object getUnreadMessages(@PathVariable(name = "userId") Long userId) {
-		log.info(" * GET \"/messages/unread/thisman/{userId}\"");
+		log.debug(" * GET \"/messages/unread/thisman/{userId}\"");
 		return messageService.getUnreadMessagesListForThisMan(userId);
 	}
 
 	//	BOT
 	@PostMapping(path = "/saveMessage", produces = {"application/json"})
 	public Object saveMessage(@RequestBody MessageTgDto messageDto) {
-		log.info(" * GET \"/saveMessage\"");
-		log.info(" * Payload: \n{}", messageDto);
+		log.debug(" * GET \"/saveMessage\"");
+		log.debug(" * Payload: \n{}", messageDto);
 		return messageService.saveMessage(messageDto);
 	}
 
 	//	BOT
 	@PostMapping(path = "/createDialogWithThisMan", produces = {"application/json"})
 	public Object createDialogWithThisMan(@RequestParam Long authorId, @RequestParam Long partnerId) {
-		log.info(" * GET \"/createDialogFWithThisMan\"");
-		log.info(" * Payload: authorId - {}, partnerId - {}", authorId, partnerId);
+		log.debug(" * GET \"/createDialogFWithThisMan\"");
+		log.debug(" * Payload: authorId - {}, partnerId - {}", authorId, partnerId);
 		return dialogService.createDialogWithThisMan(authorId, partnerId);
 	}
 
 	//	BOT
 	@GetMapping(value = "/thisman/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Object getDialogsList(@PathVariable Long id) {
-		log.info(" * GET \"/thisman/{id}\"");
+		log.debug(" * GET \"/thisman/{id}\"");
 		return dialogService.getDialogsList(id);
 	}
 
 	@GetMapping(value = "/thisdialog/{dialogId}/count", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Object getMessageCountForDialog(@PathVariable UUID dialogId) {
-		log.info(" * GET \"/thisdialog/{dialogId}/count\"");
-		return dialogService.getMessageCountForDialog(dialogId);
+		log.debug(" * GET \"/thisdialog/{dialogId}/count\"");
+		return dialogService.getMessagesCountForDialog(dialogId);
+	}
+
+	@DeleteMapping(value = "/deleteDialogWithThisMan/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Object delDialog(@PathVariable Long id) {
+		return 	dialogService.delDialogWithThisMan(id);
 	}
 
 	@PreAuthorize("hasRole('ADMIN')")
-	@DeleteMapping(value = "/deleteDialogWithThisMan/{id}")
-	public Object delDialog(@PathVariable Long id) {
-		return 	dialogService.delDialog(id);
+	@DeleteMapping(value = "/thisdialog/{dialogId}/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+	public void deleteThisDialog(@PathVariable UUID dialogId) {
+		log.debug(" * DELETE \"/thisdialog/{dialogId}/delete\"");
+		dialogService.deleteThisDialog(dialogId);
 	}
+
+
 }

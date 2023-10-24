@@ -107,7 +107,7 @@ public class DialogServiceImp implements DialogService {
 //		revInitM.setDialogId(revDiMo.getId());
 //		messageRepository.save(initM);
 
-		log.info(" * Dialogs {}, {} saved", diMo.getId(), revDiMo.getId());
+		log.debug(" * Dialogs {}, {} saved", diMo.getId(), revDiMo.getId());
 
 //		mapping Model to DTO for output
 		DialogDto dDto = objectMapper.convertValue(diMo, DialogDto.class);
@@ -235,7 +235,7 @@ public class DialogServiceImp implements DialogService {
 
 	@Override
 	@Transactional
-	public Object delDialog(Long id) {
+	public Object delDialogWithThisMan(Long id) {
 		AuthorModel aum = customMapper.getAuthorModelFromId(getPrincipalId());
 		AuthorModel pam = customMapper.getAuthorModelFromId(id);
 		Optional<DialogModel> dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(aum, pam));
@@ -245,7 +245,7 @@ public class DialogServiceImp implements DialogService {
 			dialogRepository.delete(dmrev.get());
 			return new ResponseEntity<>(HttpStatus.OK);
 		}
-		return ResponseEntity.badRequest();
+		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 	}
 
 //	coded spec for BOT
@@ -256,8 +256,23 @@ public class DialogServiceImp implements DialogService {
 	}
 
 	@Override
-	public Integer getMessageCountForDialog(UUID dialogId) {
+	public Integer getMessagesCountForDialog(UUID dialogId) {
 		return messageRepository.countByDialogId(dialogId);
 	}
 
+	@Override
+	@Transactional
+	public void deleteThisDialog(UUID dialogId) {
+		Optional<DialogModel> dm = dialogRepository.findById(dialogId);
+		if (dm.isEmpty()) {
+			return;
+		}
+		AuthorModel aum = customMapper.getAuthorModelFromId(dm.get().getConversationAuthor().getId());
+		AuthorModel pam = customMapper.getAuthorModelFromId(dm.get().getConversationPartner().getId());
+
+		try {
+			dialogRepository.deleteByConversationAuthorAndConversationPartner(aum, pam);
+			dialogRepository.deleteByConversationAuthorAndConversationPartner(pam, aum);
+		} catch (RuntimeException ignored) {}
+	}
 }
