@@ -220,7 +220,6 @@ public class DialogServiceImp implements DialogService {
 		return new ResponseEntity<>(ucd, HttpStatus.OK);
 	}
 
-
 	@Override
 	@Transactional
 	public void setLastMessage(UUID dialogId, MessageModel messageModel) {
@@ -236,16 +235,23 @@ public class DialogServiceImp implements DialogService {
 	@Override
 	@Transactional
 	public Object delDialogWithThisMan(Long id) {
-		AuthorModel aum = customMapper.getAuthorModelFromId(getPrincipalId());
-		AuthorModel pam = customMapper.getAuthorModelFromId(id);
-		Optional<DialogModel> dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(aum, pam));
-		Optional<DialogModel> dmrev = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(pam, aum));
-		if (dm.isPresent() & dmrev.isPresent())  {
-			dialogRepository.delete(dm.get());
-			dialogRepository.delete(dmrev.get());
-			return new ResponseEntity<>(HttpStatus.OK);
+//		AuthorModel aum = customMapper.getAuthorModelFromId(getPrincipalId());
+//		AuthorModel pam = customMapper.getAuthorModelFromId(id);
+		try {
+			dialogRepository.deleteByConversationAuthor_IdAndConversationPartner_Id(getPrincipalId(), id);
+			dialogRepository.deleteByConversationAuthor_IdAndConversationPartner_Id(id, getPrincipalId());
+		} catch (RuntimeException e) {
+			new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+//		Optional<DialogModel> dm = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(aum, pam));
+//		Optional<DialogModel> dmrev = Optional.ofNullable(dialogRepository.findByConversationAuthorAndConversationPartner(pam, aum));
+//		if (dm.isPresent() & dmrev.isPresent())  {
+//			dialogRepository.delete(dm.get());
+//			dialogRepository.delete(dmrev.get());
+//			return new ResponseEntity<>(HttpStatus.OK);
+//		}
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 //	coded spec for BOT

@@ -34,6 +34,8 @@ public interface DialogRepository extends JpaRepository<DialogModel, UUID> {
 
 	void deleteByConversationAuthorAndConversationPartner(AuthorModel aum, AuthorModel pam);
 //	for bot
+void deleteByConversationAuthor_IdAndConversationPartner_Id(Long authorId, Long partnerId);
+
 
 
 }
